@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgroGenesis AI Prescription",
+  "description": "Schema for variable-rate application prescription output",
+  "type": "object",
+  "required": ["input_type", "zones", "total_estimated_input"],
+  "properties": {
+    "input_type": {
+      "type": "string",
+      "enum": ["nitrogen", "potassium", "phosphorus", "herbicide", "fungicide"],
+      "description": "Type of agricultural input"
+    },
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["zone_label", "application_rate", "rationale"],
+        "properties": {
+          "zone_label": {
+            "type": "string",
+            "pattern": "^[A-D]$",
+            "description": "Zone identifier (A-D)"
+          },
+          "application_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 500,
+            "description": "Application rate in kg/ha"
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Explanation for this rate"
+          }
+        }
+      }
+    },
+    "total_estimated_input": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Field-average application rate in kg/ha"
+    },
+    "operator_notes": {
+      "type": "string",
+      "description": "Plain-language instructions for machine operator"
+    },
+    "economic_note": {
+      "type": "string",
+      "description": "Cost-benefit observation"
+    }
+  }
+}

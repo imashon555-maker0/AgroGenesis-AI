@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+pgdata/
+
+# Test / Coverage
+htmlcov/
+.coverage
+.coverage.*
+*.xml
+.pytest_cache/
+.mypy_cache/
+
+# Raster data (large files)
+*.tif
+*.tiff
+*.shp
+*.shx
+*.dbf
+
+# Uploads
+uploads/
