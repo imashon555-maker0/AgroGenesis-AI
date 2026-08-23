@@ -52,3 +52,10 @@ htmlcov/
 
 # Uploads
 uploads/
+
+# Freebuff IDE
+.freebuff/
+
+# Backend runtime
+*.db
+backend/*.db

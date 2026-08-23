@@ -1,73 +1,73 @@
+import { useState } from "react";
 import { useFields } from "@/hooks/useFields";
+import { useFieldStore } from "@/stores/fieldStore";
+import { FieldCreationModal } from "@/components/upload/FieldCreationModal";
+import { FieldCard } from "@/components/shared/FieldCard";
+import { Plus } from "lucide-react";
 
 export function FieldsPage() {
   const { data, isLoading } = useFields();
+  const { selectedFieldId, selectField } = useFieldStore();
   const fields = data?.fields || [];
+  const [showModal, setShowModal] = useState(false);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 p-4 lg:p-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Field Management</h2>
-          <p className="text-slate-400 text-sm mt-1">Manage your farm field boundaries and zones</p>
+          <h2 className="text-lg font-bold text-earth-100">Field Management</h2>
+          <p className="text-field-300 text-xs mt-1">Manage farm field boundaries and zones</p>
         </div>
-        <button className="px-4 py-2 bg-agro-600 hover:bg-agro-700 text-white rounded-lg text-sm font-medium transition-colors">
-          + Add Field
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-agro-600 hover:bg-agro-500 active:scale-95 text-earth-100 rounded-lg text-sm font-medium transition-all duration-150"
+        >
+          <Plus size={16} />
+          Add Field
         </button>
       </div>
 
       {isLoading ? (
-        <div className="text-slate-400">Loading fields...</div>
+        <div className="text-field-300 text-sm">Loading fields...</div>
       ) : fields.length === 0 ? (
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 text-center">
-          <p className="text-slate-400">No fields yet. Create your first field to get started.</p>
+        <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-8 text-center animate-fade-in">
+          <p className="text-field-300 text-sm">No fields yet. Click "+ Add Field" to create your first field.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {fields.map((field) => (
-            <div
-              key={field.id}
-              className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5 hover:border-agro-500/30 transition-colors"
-            >
-              <h3 className="font-semibold text-white text-lg">{field.name}</h3>
-              <div className="mt-3 space-y-2 text-sm text-slate-300">
-                <div className="flex justify-between">
-                  <span>Area</span>
-                  <span className="font-mono">{field.area_ha?.toFixed(1) || "—"} ha</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Soil Type</span>
-                  <span>{field.soil_type || "—"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Crop</span>
-                  <span>{field.crop_type || "—"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Zones</span>
-                  <span>{field.zones.length}</span>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-1">
-                {field.zones.map((z) => (
-                  <span
-                    key={z.id}
-                    className={`px-2 py-0.5 rounded text-xs font-medium ${
-                      z.productivity_class === "high"
-                        ? "bg-green-900/50 text-green-300"
-                        : z.productivity_class === "medium"
-                        ? "bg-yellow-900/50 text-yellow-300"
-                        : "bg-red-900/50 text-red-300"
-                    }`}
-                  >
-                    {z.zone_label}: {z.productivity_class}
-                  </span>
-                ))}
-              </div>
+        <>
+          {/* Summary Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            <div className="bg-canopy-900/40 border border-canopy-700/40 rounded-xl p-4">
+              <p className="text-[10px] text-field-300 uppercase mb-1">Total Fields</p>
+              <p className="text-xl font-bold text-earth-100">{fields.length}</p>
             </div>
+            <div className="bg-canopy-900/40 border border-canopy-700/40 rounded-xl p-4">
+              <p className="text-[10px] text-field-300 uppercase mb-1">Total Area</p>
+              <p className="text-xl font-bold text-earth-100">{fields.reduce((s, f) => s + (f.area_ha || 0), 0).toFixed(0)} ha</p>
+            </div>
+            <div className="bg-canopy-900/40 border border-canopy-700/40 rounded-xl p-4">
+              <p className="text-[10px] text-field-300 uppercase mb-1">Avg NDVI</p>
+              <p className="text-xl font-bold text-earth-100">{fields.length > 0 ? (fields.flatMap(f => f.zones).reduce((s, z, _, a) => s + (z?.mean_ndvi || 0) / a.length, 0)).toFixed(2) : "--"}</p>
+            </div>
+            <div className="bg-canopy-900/40 border border-canopy-700/40 rounded-xl p-4">
+              <p className="text-[10px] text-field-300 uppercase mb-1">Total Zones</p>
+              <p className="text-xl font-bold text-earth-100">{fields.reduce((s, f) => s + f.zones.length, 0)}</p>
+            </div>
+          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {fields.map((field) => (
+            <FieldCard
+              key={field.id}
+              field={field}
+              isSelected={field.id === selectedFieldId}
+              onClick={() => selectField(field.id)}
+            />
           ))}
         </div>
+        </>
       )}
+
+      <FieldCreationModal isOpen={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
 }

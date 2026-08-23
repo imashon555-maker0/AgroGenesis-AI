@@ -1,214 +1,131 @@
 import { useState } from "react";
 import { useFields } from "@/hooks/useFields";
 import { useFieldStore } from "@/stores/fieldStore";
+import { ImageUploader } from "@/components/upload/ImageUploader";
 import { imageryApi } from "@/api/imagery";
-import { Satellite, Upload, RefreshCw } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { ChevronDown, Satellite, Leaf } from "lucide-react";
 
 export function ImageryPage() {
   const { data: fieldsData } = useFields();
   const { selectedFieldId, selectField } = useFieldStore();
+  const queryClient = useQueryClient();
   const fields = fieldsData?.fields || [];
   const fieldId = selectedFieldId || fields[0]?.id;
 
-  const [analysis, setAnalysis] = useState<any>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [diagnosis, setDiagnosis] = useState<any>(null);
+  const [ndviResult, setNdviResult] = useState<any>(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const handleAnalyze = async () => {
     if (!fieldId) return;
-    setIsAnalyzing(true);
+    setAnalyzing(true);
     try {
       const result = await imageryApi.analyze(fieldId);
-      setAnalysis(result);
-    } catch (err) {
-      console.error("Analysis failed:", err);
+      setNdviResult(result);
+      queryClient.invalidateQueries({ queryKey: ["fields"] });
     } finally {
-      setIsAnalyzing(false);
+      setAnalyzing(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 p-4 lg:p-6 animate-fade-in-up">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-bold text-white">Satellite & Drone Imagery</h2>
-          <p className="text-slate-400 text-sm mt-1">NDVI/NDRE analysis and crop health monitoring</p>
+          <h2 className="text-lg font-bold text-earth-100">Imagery & Diagnosis</h2>
+          <p className="text-field-300 text-xs mt-1">NDVI analysis and AI-powered crop diagnosis</p>
         </div>
-
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {fields.length > 0 && (
-            <select
-              value={fieldId || ""}
-              onChange={(e) => selectField(e.target.value)}
-              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
-            >
-              {fields.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={fieldId || ""}
+                onChange={(e) => selectField(e.target.value)}
+                className="appearance-none bg-canopy-800/60 border border-canopy-700/60 rounded-lg pl-3 pr-8 py-2 text-sm text-earth-100 cursor-pointer focus:border-earth-300/60 focus:outline-none"
+                style={{ colorScheme: "dark" }}
+              >
+                {fields.map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-field-300 pointer-events-none" />
+            </div>
           )}
-
           <button
             onClick={handleAnalyze}
-            disabled={!fieldId || isAnalyzing}
-            className="flex items-center gap-2 px-4 py-2 bg-agro-600 hover:bg-agro-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+            disabled={!fieldId || analyzing}
+            className="flex items-center gap-2 px-4 py-2 bg-agro-600 hover:bg-agro-500 disabled:opacity-50 text-earth-100 rounded-lg text-sm font-medium transition-colors"
           >
-            {isAnalyzing ? <RefreshCw size={16} className="animate-spin" /> : <Satellite size={16} />}
-            {isAnalyzing ? "Analyzing..." : "Run NDVI Analysis"}
+            <Satellite size={16} />
+            {analyzing ? "Analyzing..." : "Compute NDVI"}
           </button>
         </div>
       </div>
 
-      {!fieldId ? (
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 text-center text-slate-400">
-          Select a field to analyze imagery.
-        </div>
-      ) : !analysis ? (
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 text-center">
-          <Satellite size={48} className="mx-auto text-slate-500 mb-4" />
-          <p className="text-slate-400">Click "Run NDVI Analysis" to process satellite imagery for this field.</p>
-          <p className="text-slate-500 text-sm mt-2">
-            Uses synthetic Sentinel-2 data for demo. Connect real data in production.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {/* Vegetation Index Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
-              <h3 className="font-semibold text-green-400 mb-3">NDVI (Normalized Difference Vegetation Index)</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-slate-300">
-                  <span>Mean</span>
-                  <span className="font-mono">{analysis.vegetation_indices.ndvi.mean.toFixed(4)}</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Std Dev</span>
-                  <span className="font-mono">{analysis.vegetation_indices.ndvi.std.toFixed(4)}</span>
-                </div>
-                <div className="mt-3">
-                  <p className="text-xs text-slate-400 mb-1">Class Distribution</p>
-                  <div className="flex gap-1 h-6">
-                    {Object.entries(analysis.vegetation_indices.ndvi.class_fractions).map(
-                      ([cls, frac]) => (
-                        <div
-                          key={cls}
-                          className={`rounded ${
-                            cls === "5"
-                              ? "bg-green-600"
-                              : cls === "4"
-                              ? "bg-green-400"
-                              : cls === "3"
-                              ? "bg-yellow-500"
-                              : cls === "2"
-                              ? "bg-orange-500"
-                              : cls === "1"
-                              ? "bg-red-500"
-                              : "bg-slate-600"
-                          }`}
-                          style={{ width: `${(frac as number) * 100}%` }}
-                          title={`Class ${cls}: ${((frac as number) * 100).toFixed(1)}%`}
-                        />
-                      )
-                    )}
-                  </div>
-                  <div className="flex justify-between text-xs text-slate-500 mt-1">
-                    <span>Bare</span>
-                    <span>Poor</span>
-                    <span>Moderate</span>
-                    <span>Good</span>
-                    <span>Excellent</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* Drone Image Diagnosis */}
+      <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4">
+        <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Drone Image Diagnosis</h3>
+        <ImageUploader fieldId={fieldId || ""} />
+      </div>
 
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
-              <h3 className="font-semibold text-emerald-400 mb-3">NDRE (Normalized Difference Red Edge)</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-slate-300">
-                  <span>Mean</span>
-                  <span className="font-mono">{analysis.vegetation_indices.ndre.mean.toFixed(4)}</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Std Dev</span>
-                  <span className="font-mono">{analysis.vegetation_indices.ndre.std.toFixed(4)}</span>
-                </div>
-                <div className="mt-3">
-                  <p className="text-xs text-slate-400 mb-1">Class Distribution</p>
-                  <div className="flex gap-1 h-6">
-                    {Object.entries(analysis.vegetation_indices.ndre.class_fractions).map(
-                      ([cls, frac]) => (
-                        <div
-                          key={cls}
-                          className={`rounded ${
-                            cls === "5"
-                              ? "bg-emerald-600"
-                              : cls === "4"
-                              ? "bg-emerald-400"
-                              : cls === "3"
-                              ? "bg-teal-500"
-                              : cls === "2"
-                              ? "bg-amber-500"
-                              : cls === "1"
-                              ? "bg-red-500"
-                              : "bg-slate-600"
-                          }`}
-                          style={{ width: `${(frac as number) * 100}%` }}
-                          title={`Class ${cls}: ${((frac as number) * 100).toFixed(1)}%`}
-                        />
-                      )
-                    )}
-                  </div>
-                </div>
+      {/* NDVI Results */}
+      {ndviResult && (
+        <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4 animate-pop-in">
+          <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Vegetation Analysis</h3>
+
+          {/* Summary */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            <div className="bg-canopy-900/40 rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Leaf size={10} className="text-field-300" />
+                <span className="text-[10px] text-field-300 uppercase">Mean NDVI</span>
               </div>
+              <span className="text-lg font-bold text-earth-100">{ndviResult.vegetation_indices?.ndvi?.mean?.toFixed(3) || "—"}</span>
+            </div>
+            <div className="bg-canopy-900/40 rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Leaf size={10} className="text-field-300" />
+                <span className="text-[10px] text-field-300 uppercase">Mean NDRE</span>
+              </div>
+              <span className="text-lg font-bold text-earth-100">{ndviResult.vegetation_indices?.ndre?.mean?.toFixed(3) || "—"}</span>
+            </div>
+            <div className="bg-canopy-900/40 rounded-lg p-3">
+              <span className="text-[10px] text-field-300 uppercase">Source</span>
+              <p className="text-sm text-earth-100 mt-1">{ndviResult.source || "—"}</p>
+            </div>
+            <div className="bg-canopy-900/40 rounded-lg p-3">
+              <span className="text-[10px] text-field-300 uppercase">Zones</span>
+              <p className="text-sm text-earth-100 mt-1">{ndviResult.zone_stats?.length || 0}</p>
             </div>
           </div>
 
-          {/* Zone-level stats */}
-          {analysis.zone_stats && analysis.zone_stats.length > 0 && (
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
-              <h3 className="font-semibold text-white mb-4">Zone Vegetation Statistics</h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                {analysis.zone_stats.map((z: any) => (
-                  <div key={z.zone_label} className="bg-slate-900/50 rounded-lg p-3">
-                    <span className="font-medium text-white">Zone {z.zone_label}</span>
-                    <div className="mt-2 space-y-1 text-xs text-slate-300">
-                      <div className="flex justify-between">
-                        <span>NDVI</span>
-                        <span className="font-mono">{z.mean_ndvi?.toFixed(3)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>NDRE</span>
-                        <span className="font-mono">{z.mean_ndre?.toFixed(3)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Pixels</span>
-                        <span className="font-mono">{z.pixel_count}</span>
-                      </div>
-                    </div>
+          {/* Zone breakdown */}
+          {ndviResult.zone_stats && ndviResult.zone_stats.length > 0 && (
+            <div className="space-y-2">
+              {ndviResult.zone_stats.map((z: any) => (
+                <div key={z.zone_label} className="flex items-center gap-3 bg-canopy-900/40 rounded-lg px-3 py-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      (z.mean_ndvi || 0.5) >= 0.6 ? "bg-agro-500" : (z.mean_ndvi || 0.5) >= 0.4 ? "bg-earth-300" : "bg-red-500"
+                    }`}
+                  />
+                  <span className="text-xs font-medium text-earth-100 w-16">Zone {z.zone_label}</span>
+                  <div className="flex-1 h-1.5 bg-canopy-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${
+                        (z.mean_ndvi || 0.5) >= 0.6 ? "bg-agro-500" : (z.mean_ndvi || 0.5) >= 0.4 ? "bg-earth-300" : "bg-red-500"
+                      }`}
+                      style={{ width: `${((z.mean_ndvi || 0.5) / 1.0) * 100}%` }}
+                    />
                   </div>
-                ))}
-              </div>
+                  <span className="text-[10px] text-field-300 font-mono w-12 text-right">{z.mean_ndvi?.toFixed(3)}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
       )}
-
-      {/* Image upload for diagnosis */}
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
-        <h3 className="font-semibold text-white mb-3">Drone Image Diagnosis</h3>
-        <p className="text-slate-400 text-sm mb-4">
-          Upload a drone or leaf-level photograph for AI-powered crop health diagnosis.
-        </p>
-        <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
-          <Upload size={32} className="mx-auto text-slate-500 mb-3" />
-          <p className="text-slate-400 text-sm">Drag and drop an image, or click to browse</p>
-          <p className="text-slate-500 text-xs mt-1">Supports JPEG, PNG up to 10MB</p>
-        </div>
-      </div>
     </div>
   );
 }

@@ -4,41 +4,162 @@
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --bg-primary: #0f1a12;
+  --bg-surface: #162a1e;
+  --bg-card: #1a3326;
+  --border-color: #2d4a35;
+  --text-primary: #f5e6c8;
+  --text-secondary: #c8d5c0;
+  --text-muted: #789b6c;
+  --accent-green: #2d8a4e;
+  --accent-gold: #d4a843;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: #0f172a;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
 }
 
-/* Mapbox overrides for dark theme */
+/* Mapbox overrides */
 .mapboxgl-popup-content {
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--bg-card);
+  color: var(--text-primary);
   border-radius: 8px;
   padding: 8px 12px;
+  border: 1px solid var(--border-color);
 }
 
 .mapboxgl-popup-tip {
-  border-top-color: #1e293b;
+  border-top-color: var(--bg-card);
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: var(--bg-surface);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 4px;
+  background: var(--border-color);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: var(--accent-green);
 }
+
+/* ===================== ANIMATIONS ===================== */
+
+/* Page fade-in + slide-up */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Staggered card entrance */
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Modal backdrop */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Modal slide-in */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Toast slide-in from right */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(100%); }
+}
+
+/* Drop zone pulse */
+@keyframes dropPulse {
+  0%, 100% { border-color: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
+  50%      { border-color: #4ade80; box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+}
+
+/* Progress bar shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Success checkmark draw */
+@keyframes drawCheck {
+  0%   { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Shake for errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+/* Spin for loading */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Bar grow from bottom */
+@keyframes barGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* Pop in */
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.8); }
+  70%  { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Utility classes */
+.animate-fade-in-up { animation: fadeInUp 0.4s ease-out both; }
+.animate-stagger-1 { animation: staggerIn 0.4s ease-out 0.05s both; }
+.animate-stagger-2 { animation: staggerIn 0.4s ease-out 0.10s both; }
+.animate-stagger-3 { animation: staggerIn 0.4s ease-out 0.15s both; }
+.animate-stagger-4 { animation: staggerIn 0.4s ease-out 0.20s both; }
+.animate-stagger-5 { animation: staggerIn 0.4s ease-out 0.25s both; }
+.animate-stagger-6 { animation: staggerIn 0.4s ease-out 0.30s both; }
+.animate-fade-in   { animation: fadeIn 0.25s ease-out both; }
+.animate-slide-up  { animation: slideUp 0.3s ease-out both; }
+.animate-pop-in    { animation: popIn 0.35s ease-out both; }
+.animate-slide-in-right { animation: slideInRight 0.3s ease-out both; }
+.animate-shake     { animation: shake 0.4s ease-out; }
+.animate-spin-slow  { animation: spin 1.2s linear infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.08) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }

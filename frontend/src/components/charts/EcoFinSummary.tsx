@@ -28,7 +28,7 @@ interface EcoFinDataProps {
   };
 }
 
-const PIE_COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#8b5cf6"];
+const PIE_COLORS = ["#2d8a4e", "#3b82f6", "#d4a843", "#8b5cf6"];
 
 export function EcoFinSummary({ data }: EcoFinDataProps) {
   const pieData = [
@@ -57,7 +57,7 @@ export function EcoFinSummary({ data }: EcoFinDataProps) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Financial breakdown pie */}
       <div>
-        <h4 className="text-sm font-medium text-slate-300 mb-2 text-center">Value Breakdown ($/ha)</h4>
+        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">Value Breakdown ($/ha)</h4>
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie
@@ -74,12 +74,12 @@ export function EcoFinSummary({ data }: EcoFinDataProps) {
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ background: "#1e293b", border: "1px solid #475569", borderRadius: "8px" }}
+              contentStyle={{ background: "#1a3326", border: "1px solid #2d4a35", borderRadius: "8px", color: "#f5e6c8" }}
               formatter={(value: number) => [`$${value.toFixed(2)}`, ""]}
             />
             <Legend
-              wrapperStyle={{ fontSize: "11px", color: "#94a3b8" }}
-              formatter={(value) => <span className="text-slate-300">{value}</span>}
+              wrapperStyle={{ fontSize: "11px", color: "#c8d5c0" }}
+              formatter={(value) => <span className="text-field-200">{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -87,7 +87,7 @@ export function EcoFinSummary({ data }: EcoFinDataProps) {
 
       {/* Carbon breakdown pie */}
       <div>
-        <h4 className="text-sm font-medium text-slate-300 mb-2 text-center">Carbon Sources (tCO₂e/ha)</h4>
+        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">Carbon Sources (tCO₂e/ha)</h4>
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie
@@ -99,16 +99,16 @@ export function EcoFinSummary({ data }: EcoFinDataProps) {
               paddingAngle={3}
               dataKey="value"
             >
-              <Cell fill="#22c55e" />
+              <Cell fill="#2d8a4e" />
               <Cell fill="#3b82f6" />
             </Pie>
             <Tooltip
-              contentStyle={{ background: "#1e293b", border: "1px solid #475569", borderRadius: "8px" }}
+              contentStyle={{ background: "#1a3326", border: "1px solid #2d4a35", borderRadius: "8px", color: "#f5e6c8" }}
               formatter={(value: number) => [`${value.toFixed(4)} tCO₂e`, ""]}
             />
             <Legend
-              wrapperStyle={{ fontSize: "11px", color: "#94a3b8" }}
-              formatter={(value) => <span className="text-slate-300">{value}</span>}
+              wrapperStyle={{ fontSize: "11px", color: "#c8d5c0" }}
+              formatter={(value) => <span className="text-field-200">{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -116,19 +116,19 @@ export function EcoFinSummary({ data }: EcoFinDataProps) {
 
       {/* N rate comparison */}
       <div>
-        <h4 className="text-sm font-medium text-slate-300 mb-2 text-center">N Rate Comparison</h4>
+        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">N Rate Comparison</h4>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={barData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-            <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 12 }} />
-            <YAxis tick={{ fill: "#94a3b8", fontSize: 12 }} domain={[0, 200]} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2d4a35" />
+            <XAxis dataKey="name" tick={{ fill: "#c8d5c0", fontSize: 12 }} />
+            <YAxis tick={{ fill: "#c8d5c0", fontSize: 12 }} domain={[0, 200]} />
             <Tooltip
-              contentStyle={{ background: "#1e293b", border: "1px solid #475569", borderRadius: "8px" }}
+              contentStyle={{ background: "#1a3326", border: "1px solid #2d4a35", borderRadius: "8px", color: "#f5e6c8" }}
               formatter={(value: number) => [`${value} kg/ha`, ""]}
             />
             <Bar dataKey="rate" radius={[4, 4, 0, 0]}>
               <Cell fill="#ef4444" />
-              <Cell fill="#22c55e" />
+              <Cell fill="#2d8a4e" />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

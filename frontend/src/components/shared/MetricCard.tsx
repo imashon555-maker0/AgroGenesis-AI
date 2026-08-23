@@ -5,28 +5,34 @@ interface MetricCardProps {
   value: string;
   unit?: string;
   icon: ReactNode;
-  color: "green" | "yellow" | "blue" | "emerald" | "teal" | "red";
+  color: "green" | "yellow" | "blue" | "emerald" | "teal" | "red" | "earth";
 }
 
-const COLOR_MAP = {
-  green: "bg-green-900/30 border-green-500/20 text-green-400",
-  yellow: "bg-yellow-900/30 border-yellow-500/20 text-yellow-400",
-  blue: "bg-blue-900/30 border-blue-500/20 text-blue-400",
-  emerald: "bg-emerald-900/30 border-emerald-500/20 text-emerald-400",
-  teal: "bg-teal-900/30 border-teal-500/20 text-teal-400",
-  red: "bg-red-900/30 border-red-500/20 text-red-400",
+const BORDER_COLORS = {
+  green: "border-l-agro-500",
+  yellow: "border-l-earth-300",
+  blue: "border-l-blue-500",
+  emerald: "border-l-agro-400",
+  teal: "border-l-agro-600",
+  red: "border-l-red-500",
+  earth: "border-l-earth-300",
 };
 
 export function MetricCard({ title, value, unit, icon, color }: MetricCardProps) {
   return (
-    <div className={`border rounded-xl p-4 ${COLOR_MAP[color]}`}>
-      <div className="flex items-center gap-2 mb-2 opacity-75">
+    <div
+      className={`bg-canopy-900/60 border border-canopy-700/40 border-l-[3px] ${BORDER_COLORS[color]}
+        rounded-lg p-3 cursor-default transition-all duration-150
+        hover:bg-canopy-800/60 hover:border-canopy-600/50
+      `}
+    >
+      <div className="flex items-center gap-1.5 mb-1 text-field-300">
         {icon}
-        <span className="text-xs font-medium">{title}</span>
+        <span className="text-[10px] font-medium uppercase tracking-wide">{title}</span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-xl font-bold text-white">{value}</span>
-        {unit && <span className="text-xs text-slate-400">{unit}</span>}
+        <span className="text-lg font-bold text-earth-100">{value}</span>
+        {unit && <span className="text-[10px] text-field-300">{unit}</span>}
       </div>
     </div>
   );
