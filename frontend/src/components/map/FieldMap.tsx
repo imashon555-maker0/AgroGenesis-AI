@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Map, { Source, Layer, NavigationControl } from "react-map-gl";
 import type { FillLayerSpecification, CircleLayerSpecification } from "mapbox-gl";
 import { useMapStore } from "@/stores/mapStore";
 import { Layers } from "lucide-react";
+import { fieldsApi } from "@/api/fields";
 
 interface FieldMapProps {
   selectedFieldId?: string;
@@ -68,8 +69,22 @@ export function FieldMap({
 }: FieldMapProps) {
   const { viewport, setViewport } = useMapStore();
   const [showControls, setShowControls] = useState(false);
+  const [fieldGeoJSON, setFieldGeoJSON] = useState<any>(null);
+  const [zonesGeoJSON, setZonesGeoJSON] = useState<any>(null);
 
   const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || "";
+
+  useEffect(() => {
+    if (!selectedFieldId) { setFieldGeoJSON(null); setZonesGeoJSON(null); return; }
+    (async () => {
+      const field = await fieldsApi.get(selectedFieldId);
+      if (field?.geometry) {
+        setFieldGeoJSON({ type: "Feature", geometry: field.geometry, properties: { id: field.id, name: field.name } });
+      }
+      const zones = await fieldsApi.getZonesGeoJSON(selectedFieldId);
+      setZonesGeoJSON(zones);
+    })();
+  }, [selectedFieldId]);
 
   return (
     <div className="relative w-full h-full">
@@ -100,7 +115,7 @@ export function FieldMap({
           <Source
             id={`field-${selectedFieldId}`}
             type="geojson"
-            data={`/api/v1/fields/${selectedFieldId}`}
+            data={fieldGeoJSON}
           >
             <Layer {...BOUNDARY_STYLE} />
           </Source>
@@ -111,7 +126,7 @@ export function FieldMap({
           <Source
             id={`zones-${selectedFieldId}`}
             type="geojson"
-            data={`/api/v1/fields/${selectedFieldId}/zones/geojson`}
+            data={zonesGeoJSON}
           >
             <Layer {...ZONE_STYLE} />
           </Source>
@@ -122,7 +137,7 @@ export function FieldMap({
           <Source
             id={`telemetry-${selectedFieldId}`}
             type="geojson"
-            data={`/api/v1/telemetry/${selectedFieldId}/geojson`}
+            data={null}
           >
             <Layer {...TELEMETRY_STYLE} />
           </Source>
