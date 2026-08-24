@@ -1,7 +1,9 @@
+import { useDeviceType } from "@/hooks/useDeviceType";
 import { EcoFinSummary } from "@/components/charts/EcoFinSummary";
 import { DollarSign, Leaf, TrendingUp, Factory } from "lucide-react";
 
 export function EcoFinPage() {
+  const { isPhone } = useDeviceType();
   const ecofinData = {
     carbon: {
       baseline_n_rate_kg_ha: 180.0,
@@ -33,7 +35,7 @@ export function EcoFinPage() {
           <div>
             <p className="text-[10px] text-field-300 uppercase tracking-wide font-medium mb-1">Net Enterprise Benefit</p>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-earth-100">${ecofinData.financial.net_benefit_usd_ha.toFixed(2)}</span>
+              <span className={"font-bold text-earth-100 " + (isPhone ? "text-2xl" : "text-4xl")}>${ecofinData.financial.net_benefit_usd_ha.toFixed(2)}</span>
               <span className="text-sm text-field-300">/ha per season</span>
             </div>
             <p className="text-xs text-field-300 mt-2">
@@ -48,7 +50,7 @@ export function EcoFinPage() {
       </div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className={"grid gap-3 " + (isPhone ? "grid-cols-1" : "grid-cols-3")}>
         <div className="bg-canopy-900/60 border border-l-[3px] border-l-agro-500 border-canopy-700/40 rounded-lg p-4">
           <div className="flex items-center gap-1.5 mb-1 text-field-300">
             <Leaf size={12} />
@@ -133,7 +135,7 @@ export function EcoFinPage() {
       {/* Methodology */}
       <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-5">
         <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Methodology</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div className={"grid gap-4 text-sm " + (isPhone ? "grid-cols-2" : "grid-cols-2 md:grid-cols-4")}>
           <div>
             <span className="text-field-300 text-xs">Framework</span>
             <p className="text-earth-100">{ecofinData.ets_framework}</p>

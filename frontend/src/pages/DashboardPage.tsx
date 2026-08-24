@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFields } from "@/hooks/useFields";
 import { useFieldStore } from "@/stores/fieldStore";
+import { useDeviceType } from "@/hooks/useDeviceType";
 import { FieldMap } from "@/components/map/FieldMap";
 import { FieldCard } from "@/components/shared/FieldCard";
 import { FAB } from "@/components/shared/FAB";
@@ -14,6 +15,7 @@ import { Database, Wheat, Leaf, DollarSign, Satellite, TrendingUp, X, Trash2, Do
 export function DashboardPage() {
   const { data, isLoading } = useFields();
   const { selectedFieldId, selectField } = useFieldStore();
+  const { isPhone, isTablet } = useDeviceType();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showFieldModal, setShowFieldModal] = useState(false);
@@ -47,6 +49,9 @@ export function DashboardPage() {
       setConfirmDelete(null);
     } catch { /* ignore */ }
   };
+
+  // Detail panel width adapts to device
+  const detailPanelWidth = isPhone ? "w-full" : isTablet ? "w-[260px]" : "w-[320px]";
 
   // Empty state
 
@@ -86,7 +91,7 @@ export function DashboardPage() {
         <p className="text-field-300 text-center max-w-md mb-6 text-sm">
           Start by creating your first field or loading sample data to explore the platform.
         </p>
-        <div className="flex gap-3">
+        <div className={isPhone ? "flex flex-col w-full max-w-xs" : "flex gap-3"}>
           <button
             onClick={() => setShowFieldModal(true)}
             className="px-5 py-2.5 bg-agro-600 hover:bg-agro-500 text-earth-100 rounded-lg text-sm font-medium transition-colors"
@@ -122,7 +127,7 @@ export function DashboardPage() {
 
         {/* Field detail slide-in panel */}
         {detailField && activeField && (
-          <div className="absolute top-0 right-0 h-full w-[320px] bg-field-900/95 backdrop-blur-sm border-l border-canopy-700/60 overflow-y-auto animate-slide-in-right z-20">
+          <div className={"absolute top-0 right-0 h-full bg-field-900/95 backdrop-blur-sm border-l border-canopy-700/60 overflow-y-auto animate-slide-in-right z-20 " + detailPanelWidth}>
             {/* Close button */}
             <button
               onClick={() => setDetailField(null)}

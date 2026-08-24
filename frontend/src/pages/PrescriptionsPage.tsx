@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFields } from "@/hooks/useFields";
 import { useFieldStore } from "@/stores/fieldStore";
+import { useDeviceType } from "@/hooks/useDeviceType";
 import { useGeneratePrescription, useExportISOBUS, useExportShapefile } from "@/hooks/usePrescription";
 import type { Prescription } from "@/types";
 import { Bot, Download, FileText, Sparkles, ChevronDown } from "lucide-react";
@@ -8,6 +9,7 @@ import { Bot, Download, FileText, Sparkles, ChevronDown } from "lucide-react";
 export function PrescriptionsPage() {
   const { data: fieldsData } = useFields();
   const { selectedFieldId, selectField } = useFieldStore();
+  const { isPhone } = useDeviceType();
   const fields = fieldsData?.fields || [];
   const fieldId = selectedFieldId || fields[0]?.id;
 
@@ -31,13 +33,13 @@ export function PrescriptionsPage() {
   return (
     <div className="space-y-5 p-4 lg:p-6 animate-fade-in-up">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className={"flex items-center justify-between flex-wrap gap-3 " + (isPhone ? "flex-col items-start" : "")}>
         <div>
           <h2 className="text-lg font-bold text-earth-100">AI Prescription Builder</h2>
           <p className="text-field-300 text-xs mt-1">Generate VRA prescriptions using DeepSeek V4</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className={"flex items-center gap-2 " + (isPhone ? "flex-wrap" : "")}>
           {fields.length > 0 && (
             <div className="relative">
               <select
@@ -166,7 +168,7 @@ export function PrescriptionsPage() {
           {/* AI Model info */}
           <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4">
             <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-2">AI Model Details</h3>
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className={"grid gap-3 text-xs " + (isPhone ? "grid-cols-1" : "grid-cols-2")}>
               <div>
                 <span className="text-field-300">Model</span>
                 <p className="text-earth-100 font-mono">{prescription.deepseek_model || "deepseek-v4-pro"}</p>

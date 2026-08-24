@@ -113,6 +113,7 @@ export function FieldMap({
         {/* Field boundary */}
         {selectedFieldId && (
           <Source
+          key={`field-${selectedFieldId}`}
             id={`field-${selectedFieldId}`}
             type="geojson"
             data={fieldGeoJSON}
@@ -124,6 +125,7 @@ export function FieldMap({
         {/* Zone overlay */}
         {selectedFieldId && showZones && (
           <Source
+          key={`zones-${selectedFieldId}`}
             id={`zones-${selectedFieldId}`}
             type="geojson"
             data={zonesGeoJSON}
@@ -135,6 +137,7 @@ export function FieldMap({
         {/* Telemetry points */}
         {selectedFieldId && showTelemetry && (
           <Source
+          key={`telemetry-${selectedFieldId}`}
             id={`telemetry-${selectedFieldId}`}
             type="geojson"
             data={null}

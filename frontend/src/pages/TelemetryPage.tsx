@@ -1,6 +1,7 @@
 import { useFields } from "@/hooks/useFields";
 import { useTelemetryStats } from "@/hooks/useTelemetry";
 import { useFieldStore } from "@/stores/fieldStore";
+import { useDeviceType } from "@/hooks/useDeviceType";
 import { TelemetryDropZone } from "@/components/upload/TelemetryDropZone";
 import { ZoneComparison } from "@/components/charts/ZoneComparison";
 import { ChevronDown } from "lucide-react";
@@ -8,6 +9,7 @@ import { ChevronDown } from "lucide-react";
 export function TelemetryPage() {
   const { data: fieldsData } = useFields();
   const { selectedFieldId, selectField } = useFieldStore();
+  const { isPhone } = useDeviceType();
   const fields = fieldsData?.fields || [];
   const fieldId = selectedFieldId || fields[0]?.id;
   const { data: stats, isLoading: statsLoading } = useTelemetryStats(fieldId || null);
@@ -15,7 +17,7 @@ export function TelemetryPage() {
   return (
     <div className="space-y-5 p-4 lg:p-6 animate-fade-in-up">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className={"flex items-center justify-between flex-wrap gap-3 " + (isPhone ? "flex-col items-start" : "")}>
         <div>
           <h2 className="text-lg font-bold text-earth-100">Telemetry Monitor</h2>
           <p className="text-field-300 text-xs mt-1">Machine data and zone-level aggregation</p>
@@ -54,7 +56,7 @@ export function TelemetryPage() {
           {statsLoading ? (
             <div className="text-field-300 text-xs">Loading stats...</div>
           ) : stats && stats.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className={"grid gap-3 " + (isPhone ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-4")}>
               {stats.map((s) => (
                 <div key={s.zone_id} className="bg-canopy-900/40 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2">

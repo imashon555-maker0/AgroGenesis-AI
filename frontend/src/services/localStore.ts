@@ -1,3 +1,5 @@
+import { getCurrentUser } from "@/services/authStore";
+
 /** 
  * localStorage data layer for offline-first operation.
  * Stores fields, telemetry, and prescriptions without any backend.
@@ -10,16 +12,40 @@ function uuid(): string {
   });
 }
 
-const KEYS = {
+const BASE_KEYS = {
   fields: "agro_fields",
   telemetry: "agro_telemetry",
   prescriptions: "agro_prescriptions",
 };
 
+function getPrefixedKeys() {
+  const user = getCurrentUser();
+  const prefix = user?.dataPrefix || "";
+  return {
+    fields: prefix + BASE_KEYS.fields,
+    telemetry: prefix + BASE_KEYS.telemetry,
+    prescriptions: prefix + BASE_KEYS.prescriptions,
+  };
+}
+
 function getStore(key: string): any[] {
-  try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
+  // key is already fully prefixed by caller (getPrefixedKeys)
+  const stored = localStorage.getItem(key);
+  if (stored !== null) {
+    try { return JSON.parse(stored); } catch { return []; }
+  }
+  // Legacy fallback: strip user prefix to check unprefixed key
+  const user = getCurrentUser();
+  if (user?.dataPrefix && key.startsWith(user.dataPrefix)) {
+    const baseKey = key.slice(user.dataPrefix.length);
+    if (baseKey !== key) {
+      try { return JSON.parse(localStorage.getItem(baseKey) || "[]"); } catch { return []; }
+    }
+  }
+  return [];
 }
 function setStore(key: string, data: any[]) {
+  // key is already fully prefixed by caller (getPrefixedKeys)
   localStorage.setItem(key, JSON.stringify(data));
 }
 
@@ -47,7 +73,8 @@ function getFieldBounds(geometry: any) {
 // ============================================================
 
 export function createField(data: { name: string; geometry: any; soil_type?: string; crop_type?: string }) {
-  const fields = getStore(KEYS.fields);
+  const keys = getPrefixedKeys();
+  const fields = getStore(keys.fields);
   const totalArea = computeArea(data.geometry.coordinates || [[[0, 0]]]);
   const zones = [
     { id: uuid(), zone_index: 0, zone_label: "A", productivity_class: "high", area_ha: Math.round((totalArea / 4) * 10) / 10, mean_ndvi: 0.72, mean_ndre: 0.58 },
@@ -62,27 +89,28 @@ export function createField(data: { name: string; geometry: any; soil_type?: str
     zones, created_at: new Date().toISOString(), updated_at: null,
   };
   fields.push(field);
-  setStore(KEYS.fields, fields);
+  setStore(getPrefixedKeys().fields, fields);
   return field;
 }
 
 export function listFields() {
-  const f = getStore(KEYS.fields);
+  const f = getStore(getPrefixedKeys().fields);
   return { fields: f, total: f.length };
 }
 
 export function getField(id: string) {
-  return getStore(KEYS.fields).find((f: any) => f.id === id) || null;
+  return getStore(getPrefixedKeys().fields).find((f: any) => f.id === id) || null;
 }
 
 export function deleteField(id: string): boolean {
-  const fields = getStore(KEYS.fields);
+  const keys = getPrefixedKeys();
+  const fields = getStore(keys.fields);
   const filtered = fields.filter((f: any) => f.id !== id);
   if (filtered.length === fields.length) return false;
-  setStore(KEYS.fields, filtered);
+  setStore(getPrefixedKeys().fields, filtered);
   // Also remove associated telemetry
-  const telemetry = getStore(KEYS.telemetry);
-  setStore(KEYS.telemetry, telemetry.filter((r: any) => r.field_id !== id));
+  const telemetry = getStore(getPrefixedKeys().telemetry);
+  setStore(getPrefixedKeys().telemetry, telemetry.filter((r: any) => r.field_id !== id));
   return true;
 }
 
@@ -180,9 +208,9 @@ export function parseCSVTelemetry(csvText: string, fieldId: string) {
     });
   }
 
-  const existing = getStore(KEYS.telemetry);
+  const existing = getStore(getPrefixedKeys().telemetry);
   existing.push(...records);
-  setStore(KEYS.telemetry, existing);
+  setStore(getPrefixedKeys().telemetry, existing);
 
   return {
     records_parsed: records.length,
@@ -195,7 +223,7 @@ export function parseCSVTelemetry(csvText: string, fieldId: string) {
 export function getTelemetryStats(fieldId: string) {
   const field = getField(fieldId);
   if (!field) return [];
-  const records = getStore(KEYS.telemetry).filter((r: any) => r.field_id === fieldId);
+  const records = getStore(getPrefixedKeys().telemetry).filter((r: any) => r.field_id === fieldId);
   return field.zones.map((zone: any) => {
     const zr = records.filter((r: any) => r.zone_id === zone.id);
     return {
@@ -211,7 +239,7 @@ export function getTelemetryStats(fieldId: string) {
 }
 
 export function getAllTelemetryForField(fieldId: string) {
-  return getStore(KEYS.telemetry).filter((r: any) => r.field_id === fieldId);
+  return getStore(getPrefixedKeys().telemetry).filter((r: any) => r.field_id === fieldId);
 }
 
 // ============================================================
@@ -242,7 +270,8 @@ export function generateLocalPrescription(fieldId: string, inputType: string) {
 // ============================================================
 
 export function exportFieldsAsGeoJSON(): string {
-  const fields = getStore(KEYS.fields);
+  const keys = getPrefixedKeys();
+  const fields = getStore(keys.fields);
   const features = fields.map((f: any) => ({
     type: "Feature", id: f.id, geometry: f.geometry,
     properties: {
@@ -257,7 +286,7 @@ export function exportFieldsAsGeoJSON(): string {
 }
 
 export function exportTelemetryAsCSV(fieldId: string): string {
-  const records = getStore(KEYS.telemetry).filter((r: any) => r.field_id === fieldId);
+  const records = getStore(getPrefixedKeys().telemetry).filter((r: any) => r.field_id === fieldId);
   if (records.length === 0) return "";
   const headers = ["timestamp", "machine_id", "lat", "lon", "speed_kmh", "fuel_rate_l_h", "fuel_consumption_l_ha", "applied_rate_kg_ha", "source_format", "zone_id"];
   const rows = records.map((r: any) => headers.map((h) => r[h] ?? "").join(","));
@@ -296,5 +325,8 @@ export async function loadSampleData(): Promise<{ fieldsCreated: number; records
 }
 
 export function clearAll() {
-  Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
+  const keys = getPrefixedKeys();
+  Object.values(keys).forEach((k) => localStorage.removeItem(k));
+  // Also clear legacy unprefixed keys
+  Object.values(BASE_KEYS).forEach((k) => localStorage.removeItem(k));
 }

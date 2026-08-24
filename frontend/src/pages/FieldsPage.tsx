@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFields } from "@/hooks/useFields";
 import { useFieldStore } from "@/stores/fieldStore";
+import { useDeviceType } from "@/hooks/useDeviceType";
 import { FieldCreationModal } from "@/components/upload/FieldCreationModal";
 import { FieldCard } from "@/components/shared/FieldCard";
 import { Plus } from "lucide-react";
@@ -8,12 +9,13 @@ import { Plus } from "lucide-react";
 export function FieldsPage() {
   const { data, isLoading } = useFields();
   const { selectedFieldId, selectField } = useFieldStore();
+  const { isPhone } = useDeviceType();
   const fields = data?.fields || [];
   const [showModal, setShowModal] = useState(false);
 
   return (
     <div className="space-y-5 p-4 lg:p-6 animate-fade-in-up">
-      <div className="flex items-center justify-between">
+      <div className={"flex items-center justify-between " + (isPhone ? "flex-col items-start gap-3" : "")}>
         <div>
           <h2 className="text-lg font-bold text-earth-100">Field Management</h2>
           <p className="text-field-300 text-xs mt-1">Manage farm field boundaries and zones</p>
@@ -54,7 +56,7 @@ export function FieldsPage() {
               <p className="text-xl font-bold text-earth-100">{fields.reduce((s, f) => s + f.zones.length, 0)}</p>
             </div>
           </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+        <div className={"grid gap-3 " + (isPhone ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6")}>
           {fields.map((field) => (
             <FieldCard
               key={field.id}

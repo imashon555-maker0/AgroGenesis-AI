@@ -74,3 +74,12 @@ WeatherWidget lives in the dashboard slide-in detail panel, between the zone lis
 
 ### Settings page pattern
 /settings route with SettingsPage component provides: data management (stored field count, export all as GeoJSON, clear all data with double confirmation), and about section (version, AI engine, hackathon track). The nav item uses the Settings icon from lucide-react.
+
+### localStore API shape is snake_case — UI uses camelCase
+`listFields()` returns `{ fields: Field[], total: number }`, not a plain array. `getTelemetryStats()` returns objects with `record_count`, `zone_label`, `area_ha` (snake_case). `generateLocalPrescription()` returns `{ zones: [...] }` with `application_rate`, not `zoneRates`/`rate`. The API layer (`fields.ts`, `telemetry.ts`) must bridge this naming mismatch.
+
+### Vitest tests for localStore need fetch mock
+`loadSampleData()` is async and calls `fetch('/sample-telemetry.csv')`. In vitest/jsdom without a running dev server, `fetch` hangs forever. Use `vi.stubGlobal('fetch', async () => ({ ok: true, text: async () => csvContent }))` in `beforeEach` to provide mock CSV data.
+
+### GitHub secret scanner blocks pushes with realistic placeholders
+`.env.example` containing realistic-looking API key formats (e.g., `sk-abc123...`) triggers GitHub's push protection secret scanner. Replace with obvious placeholders like `your-deepseek-api-key-here`. This also requires squashing the git history to remove the old secret-containing commits.

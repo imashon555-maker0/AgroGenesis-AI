@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFields } from "@/hooks/useFields";
 import { useFieldStore } from "@/stores/fieldStore";
+import { useDeviceType } from "@/hooks/useDeviceType";
 import { ImageUploader } from "@/components/upload/ImageUploader";
 import { imageryApi } from "@/api/imagery";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,6 +10,7 @@ import { ChevronDown, Satellite, Leaf } from "lucide-react";
 export function ImageryPage() {
   const { data: fieldsData } = useFields();
   const { selectedFieldId, selectField } = useFieldStore();
+  const { isPhone } = useDeviceType();
   const queryClient = useQueryClient();
   const fields = fieldsData?.fields || [];
   const fieldId = selectedFieldId || fields[0]?.id;
@@ -31,7 +33,7 @@ export function ImageryPage() {
   return (
     <div className="space-y-5 p-4 lg:p-6 animate-fade-in-up">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className={"flex items-center justify-between flex-wrap gap-3 " + (isPhone ? "flex-col items-start" : "")}>
         <div>
           <h2 className="text-lg font-bold text-earth-100">Imagery & Diagnosis</h2>
           <p className="text-field-300 text-xs mt-1">NDVI analysis and AI-powered crop diagnosis</p>
@@ -75,7 +77,7 @@ export function ImageryPage() {
           <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Vegetation Analysis</h3>
 
           {/* Summary */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <div className={"grid gap-3 mb-4 " + (isPhone ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-4")}>
             <div className="bg-canopy-900/40 rounded-lg p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Leaf size={10} className="text-field-300" />
