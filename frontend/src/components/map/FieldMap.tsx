@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import Map, { Source, Layer, NavigationControl } from "react-map-gl";
 import type { FillLayerSpecification, CircleLayerSpecification } from "mapbox-gl";
 import { useMapStore } from "@/stores/mapStore";
-import { Layers } from "lucide-react";
+import { Layers, PenTool } from "lucide-react";
+import { MapDrawControl } from "./MapDrawControl";
 import { fieldsApi } from "@/api/fields";
 
 interface FieldMapProps {
@@ -10,6 +11,9 @@ interface FieldMapProps {
   showZones?: boolean;
   showTelemetry?: boolean;
   onFieldClick?: (fieldId: string) => void;
+  onDrawComplete?: (geometry: any) => void;
+  drawMode?: boolean;
+  onToggleDraw?: () => void;
 }
 
 const ZONE_STYLE: { id: string; type: FillLayerSpecification["type"]; paint: FillLayerSpecification["paint"] } = {
@@ -66,6 +70,9 @@ export function FieldMap({
   showZones = true,
   showTelemetry = false,
   onFieldClick: _onFieldClick,
+  onDrawComplete,
+  drawMode = false,
+  onToggleDraw,
 }: FieldMapProps) {
   const { viewport, setViewport } = useMapStore();
   const [showControls, setShowControls] = useState(false);
@@ -109,6 +116,9 @@ export function FieldMap({
         style={{ width: "100%", height: "100%" }}
       >
         <NavigationControl position="top-right" />
+        {onDrawComplete && (
+          <MapDrawControl onDrawComplete={onDrawComplete} enabled={drawMode} />
+        )}
 
         {/* Field boundary */}
         {selectedFieldId && (
@@ -148,6 +158,31 @@ export function FieldMap({
 
 
       </Map>
+      )}
+
+      {/* Draw mode toggle */}
+      {onToggleDraw && (
+        <div className="absolute top-4 right-16 z-10">
+          <button
+            onClick={onToggleDraw}
+            className={
+              "p-2 rounded-lg border transition-colors " +
+              (drawMode
+                ? "bg-agro-600 border-agro-500 text-earth-100"
+                : "bg-field-900/90 border-canopy-700/60 text-field-200 hover:bg-canopy-800/90")
+            }
+            title={drawMode ? "Отменить рисование" : "Нарисовать границу поля"}
+          >
+            <PenTool size={18} />
+          </button>
+        </div>
+      )}
+
+      {/* Draw mode indicator */}
+      {drawMode && (
+        <div className="absolute top-16 left-4 z-10 bg-agro-600/90 text-earth-100 px-3 py-2 rounded-lg text-xs font-medium animate-pulse">
+          Кликните на карту чтобы нарисовать границу. Двойной клик для завершения.
+        </div>
       )}
 
       {/* Layer controls */}

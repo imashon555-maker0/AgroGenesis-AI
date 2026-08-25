@@ -1,34 +1,68 @@
 import { useDeviceType } from "@/hooks/useDeviceType";
+import { useFields } from "@/hooks/useFields";
+import { useFieldStore } from "@/stores/fieldStore";
 import { EcoFinSummary } from "@/components/charts/EcoFinSummary";
-import { DollarSign, Leaf, TrendingUp, Factory } from "lucide-react";
+import { DollarSign, Leaf, TrendingUp, Factory, ChevronDown } from "lucide-react";
 
 export function EcoFinPage() {
   const { isPhone } = useDeviceType();
+  const { data: fieldsData } = useFields();
+  const { selectedFieldId, selectField } = useFieldStore();
+  const fields = fieldsData?.fields || [];
+  const field = fields.find((f) => f.id === (selectedFieldId || fields[0]?.id));
+
+  const avgNdvi = field && field.zones.length > 0 ? field.zones.reduce((s, z) => s + (z.mean_ndvi || 0), 0) / field.zones.length : 0.5;
+  const areaHa = field?.area_ha || 250;
+  const baselineN = 180;
+  const nSavingsKg = Math.max(0, Math.round((0.65 - avgNdvi) * 40 * 10) / 10);
+  const optimizedN = baselineN - nSavingsKg;
+  const nSavingsPct = baselineN > 0 ? Math.round((nSavingsKg / baselineN) * 1000) / 10 : 0;
+  const n2oAvoided = Math.round(nSavingsKg * 0.01 * 298 * 10000) / 10000;
+  const mfgOffset = Math.round(nSavingsKg * 0.00455 * 1000) / 1000;
+  const totalCarbon = Math.round((n2oAvoided + mfgOffset) * 10000) / 10000;
+  const fertSaving = Math.round(nSavingsKg * 0.85 * 100) / 100;
+  const fuelSaving = Math.round((nSavingsKg * 0.03 + areaHa * 0.0005) * 100) / 100;
+  const carbonRevenue = Math.round(totalCarbon * 15 * 100) / 100;
+  const netHa = Math.round((fertSaving + fuelSaving + carbonRevenue) * 100) / 100;
+  const totalNet = Math.round(netHa * areaHa * 100) / 100;
   const ecofinData = {
     carbon: {
-      baseline_n_rate_kg_ha: 180.0,
-      optimized_n_rate_kg_ha: 140.0,
-      n_savings_kg_ha: 40.0,
-      n_savings_pct: 22.2,
-      n2o_avoided_tco2e_ha: 0.1192,
-      manufacturing_offset_tco2e_ha: 0.182,
-      total_carbon_tco2e_ha: 0.3012,
+      baseline_n_rate_kg_ha: baselineN,
+      optimized_n_rate_kg_ha: optimizedN,
+      n_savings_kg_ha: nSavingsKg,
+      n_savings_pct: nSavingsPct,
+      n2o_avoided_tco2e_ha: n2oAvoided,
+      manufacturing_offset_tco2e_ha: mfgOffset,
+      total_carbon_tco2e_ha: totalCarbon,
     },
     financial: {
-      fertilizer_cost_saving_usd: 34.0,
-      fuel_cost_saving_usd: 1.21,
-      total_cost_saving_usd: 35.21,
-      carbon_credit_revenue_usd: 4.52,
-      net_benefit_usd_ha: 39.73,
-      total_net_benefit_usd: 9932.5,
+      fertilizer_cost_saving_usd: fertSaving,
+      fuel_cost_saving_usd: fuelSaving,
+      total_cost_saving_usd: Math.round((fertSaving + fuelSaving) * 100) / 100,
+      carbon_credit_revenue_usd: carbonRevenue,
+      net_benefit_usd_ha: netHa,
+      total_net_benefit_usd: totalNet,
     },
     ets_framework: "KAZ-ETS",
-    carbon_price_usd_per_ton: 15.0,
-    total_area_ha: 250,
+    carbon_price_usd_per_ton: 15,
+    total_area_ha: areaHa,
   };
 
   return (
     <div className="space-y-5 p-4 lg:p-6 animate-fade-in-up">
+      {/* Field selector */}
+      {fields.length > 1 && (
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-field-300">Поле:</span>
+          <div className="relative">
+            <select value={field?.id || ""} onChange={(e) => selectField(e.target.value)} className="appearance-none bg-canopy-800/60 border border-canopy-700/60 rounded-lg pl-3 pr-8 py-2 text-sm text-earth-100 cursor-pointer focus:border-earth-300/60 focus:outline-none" style={{ colorScheme: "dark" }}>
+              {fields.map((f) => (<option key={f.id} value={f.id}>{f.name} ({f.area_ha?.toFixed(0)} ha)</option>))}
+            </select>
+            <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-field-300 pointer-events-none" />
+          </div>
+        </div>
+      )}
+
       {/* Hero number */}
       <div className="bg-gradient-to-r from-canopy-800/60 to-canopy-900/40 border border-canopy-700/40 rounded-xl p-6">
         <div className="flex items-center justify-between">
@@ -56,7 +90,7 @@ export function EcoFinPage() {
             <Leaf size={12} />
             <span className="text-[10px] uppercase tracking-wide font-medium">Общий углерод</span>
           </div>
-          <span className="text-xl font-bold text-earth-100">{ecofinData.carbon.total_carbon_tco2e_ha.toFixed(2)}</span>
+          <span className="text-xl font-bold text-earth-100">{ecofinData.carbon.total_carbon_tco2e_ha.toFixed(4)}</span>
           <span className="text-[10px] text-field-300 ml-1">tCO₂e/ha</span>
         </div>
         <div className="bg-canopy-900/60 border border-l-[3px] border-l-earth-300 border-canopy-700/40 rounded-lg p-4">

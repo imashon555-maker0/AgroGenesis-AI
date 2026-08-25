@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X, Upload, MapPin, FileJson } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fieldsApi } from "@/api/fields";
@@ -35,6 +35,17 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
       setError(err.message);
     },
   });
+
+  // Pick up drawn geometry when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const drawn = (window as any).__drawnGeometry;
+      if (drawn) {
+        setGeometryText(drawn);
+        delete (window as any).__drawnGeometry;
+      }
+    }
+  }, [isOpen]);
 
   const resetForm = () => {
     setName("");
@@ -133,7 +144,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
               type="text"
               value={name}
               onChange={(e) => { setName(e.target.value); setError(""); }}
-              placeholder="e.g., Northern Quarter"
+              placeholder="Поле номер 12"
               className="w-full bg-canopy-900/60 border border-canopy-700/60 rounded-lg px-3 py-2.5 text-sm text-earth-100 placeholder-field-400 focus:border-earth-300/60 focus:ring-1 focus:ring-earth-300/30 outline-none transition-colors"
             />
           </div>
@@ -146,7 +157,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
                 type="text"
                 value={soilType}
                 onChange={(e) => setSoilType(e.target.value)}
-                placeholder="e.g., Chernozem"
+                placeholder="Чернозём"
                 className="w-full bg-canopy-900/60 border border-canopy-700/60 rounded-lg px-3 py-2.5 text-sm text-earth-100 placeholder-field-400 focus:border-earth-300/60 focus:ring-1 focus:ring-earth-300/30 outline-none transition-colors"
               />
             </div>
@@ -156,7 +167,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
                 type="text"
                 value={cropType}
                 onChange={(e) => setCropType(e.target.value)}
-                placeholder="e.g., Winter Wheat"
+                placeholder="Озимая пшеница"
                 className="w-full bg-canopy-900/60 border border-canopy-700/60 rounded-lg px-3 py-2.5 text-sm text-earth-100 placeholder-field-400 focus:border-earth-300/60 focus:ring-1 focus:ring-earth-300/30 outline-none transition-colors"
               />
             </div>
@@ -227,7 +238,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
             onClick={onClose}
             className="px-4 py-2 text-sm text-field-200 hover:text-earth-100 transition-colors"
           >
-            Cancel
+            Отмена
           </button>
           <button
             onClick={handleSubmit}

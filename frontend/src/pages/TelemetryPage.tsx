@@ -4,6 +4,8 @@ import { useFieldStore } from "@/stores/fieldStore";
 import { useDeviceType } from "@/hooks/useDeviceType";
 import { TelemetryDropZone } from "@/components/upload/TelemetryDropZone";
 import { ZoneComparison } from "@/components/charts/ZoneComparison";
+import { TelemetryTimeSeries } from "@/components/charts/TelemetryTimeSeries";
+import { getTelemetryTimeSeries } from "@/services/localStore";
 import { ChevronDown } from "lucide-react";
 
 export function TelemetryPage() {
@@ -13,6 +15,7 @@ export function TelemetryPage() {
   const fields = fieldsData?.fields || [];
   const fieldId = selectedFieldId || fields[0]?.id;
   const { data: stats, isLoading: statsLoading } = useTelemetryStats(fieldId || null);
+  const timeSeries = fieldId ? getTelemetryTimeSeries(fieldId) : [];
 
   return (
     <div className="space-y-5 p-4 lg:p-6 animate-fade-in-up">
@@ -98,11 +101,19 @@ export function TelemetryPage() {
         </div>
       )}
 
-      {/* Charts */}
+      {/* Zone Comparison */}
       {stats && stats.length > 0 && (
         <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4">
           <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Сравнение зон</h3>
           <ZoneComparison stats={stats} />
+        </div>
+      )}
+
+      {/* Time Series Charts */}
+      {timeSeries.length > 0 && (
+        <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4">
+          <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Динамика показателей по дням</h3>
+          <TelemetryTimeSeries data={timeSeries} />
         </div>
       )}
     </div>

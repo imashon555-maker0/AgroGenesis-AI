@@ -220,6 +220,192 @@ export function parseCSVTelemetry(csvText: string, fieldId: string) {
   };
 }
 
+
+
+// ============================================================
+// Telemetry time-series aggregation (grouped by day)
+// ============================================================
+
+export function getTelemetryTimeSeries(fieldId: string) {
+  const records = getStore(getPrefixedKeys().telemetry).filter((r: any) => r.field_id === fieldId);
+  if (records.length === 0) return [];
+
+  // Group by date
+  const byDay: Record<string, { speeds: number[]; fuels: number[]; rates: number[]; count: number }> = {};
+  for (const r of records) {
+    const date = (r.timestamp || "").slice(0, 10); // YYYY-MM-DD
+    if (!date) continue;
+    if (!byDay[date]) byDay[date] = { speeds: [], fuels: [], rates: [], count: 0 };
+    const d = byDay[date];
+    d.count++;
+    if (r.speed_kmh != null && r.speed_kmh > 0) d.speeds.push(r.speed_kmh);
+    if (r.fuel_consumption_l_ha != null && r.fuel_consumption_l_ha > 0) d.fuels.push(r.fuel_consumption_l_ha);
+    if (r.applied_rate_kg_ha != null && r.applied_rate_kg_ha > 0) d.rates.push(r.applied_rate_kg_ha);
+  }
+
+  return Object.entries(byDay)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, d]) => {
+      const avg = (arr: number[]) => arr.length ? Math.round(arr.reduce((s, v) => s + v, 0) / arr.length * 10) / 10 : null;
+      // Format date for display (DD.MM)
+      const parts = date.split("-");
+      const displayDate = parts[2] + "." + parts[1];
+      return {
+        date: displayDate,
+        fullDate: date,
+        speed: avg(d.speeds),
+        fuel: avg(d.fuels),
+        appliedRate: avg(d.rates),
+        records: d.count,
+      };
+    });
+}
+
+// ============================================================
+// Alert computation from real field data
+// ============================================================
+
+export interface FieldAlert {
+  id: string;
+  severity: "warning" | "critical";
+  message: string;
+  fieldName: string;
+  zoneLabel: string;
+  type: string;
+  timestamp: string;
+}
+
+const NDVI_WARN = 0.4;
+const NDVI_CRIT = 0.25;
+const FUEL_HIGH = 15;
+const FUEL_CRIT = 20;
+const STALE_PRESCRIPTION_DAYS = 30;
+
+export function computeAlerts(): FieldAlert[] {
+  const fields = getStore(getPrefixedKeys().fields);
+  const telemetry = getStore(getPrefixedKeys().telemetry);
+  const prescriptions = getStore(getPrefixedKeys().prescriptions);
+  const alerts: FieldAlert[] = [];
+  const now = new Date();
+
+  for (const field of fields) {
+    const fieldId = field.id;
+    const fieldName = field.name;
+
+    // 1. NDVI threshold alerts per zone
+    for (const zone of (field.zones || [])) {
+      const n = zone.mean_ndvi || 0;
+      if (n < NDVI_CRIT) {
+        alerts.push({
+          id: fieldId + "-ndvi-c-" + zone.id,
+          severity: "critical",
+          message: "NDVI " + n.toFixed(2) + " — критический стресс растений",
+          fieldName, zoneLabel: zone.zone_label,
+          type: "ndvi_critical", timestamp: now.toISOString(),
+        });
+      } else if (n < NDVI_WARN) {
+        alerts.push({
+          id: fieldId + "-ndvi-w-" + zone.id,
+          severity: "warning",
+          message: "NDVI " + n.toFixed(2) + " — ниже нормы, требуется внимание",
+          fieldName, zoneLabel: zone.zone_label,
+          type: "ndvi_warning", timestamp: now.toISOString(),
+        });
+      }
+    }
+
+    // 2. NDVI variability across zones
+    const ndviValues = (field.zones || []).map((z: any) => z.mean_ndvi || 0.5);
+    if (ndviValues.length >= 2) {
+      const spread = Math.max(...ndviValues) - Math.min(...ndviValues);
+      if (spread > 0.3) {
+        alerts.push({
+          id: fieldId + "-ndvi-spread",
+          severity: "warning",
+          message: "Разброс NDVI " + spread.toFixed(2) + " по зонам — неравномерное развитие",
+          fieldName, zoneLabel: "Все",
+          type: "ndvi_spread", timestamp: now.toISOString(),
+        });
+      }
+    }
+
+    // 3. High fuel consumption alerts
+    const fieldRecords = telemetry.filter((r: any) => r.field_id === fieldId);
+    const zoneStats: Record<string, { total_fuel: number; count: number; zone_label: string }> = {};
+    for (const record of fieldRecords) {
+      const zid = record.zone_id || "unknown";
+      if (!zoneStats[zid]) zoneStats[zid] = { total_fuel: 0, count: 0, zone_label: record.zone_label || "?" };
+      zoneStats[zid].total_fuel += record.fuel_consumption_l_ha || 0;
+      zoneStats[zid].count++;
+    }
+    for (const [zid, stats] of Object.entries(zoneStats)) {
+      if (stats.count === 0) continue;
+      const avgFuel = stats.total_fuel / stats.count;
+      if (avgFuel > FUEL_CRIT) {
+        alerts.push({
+          id: fieldId + "-fuel-c-" + zid,
+          severity: "critical",
+          message: "Расход топлива " + avgFuel.toFixed(1) + " L/ha — критически высокий",
+          fieldName, zoneLabel: stats.zone_label,
+          type: "fuel_critical", timestamp: now.toISOString(),
+        });
+      } else if (avgFuel > FUEL_HIGH) {
+        alerts.push({
+          id: fieldId + "-fuel-w-" + zid,
+          severity: "warning",
+          message: "Расход топлива " + avgFuel.toFixed(1) + " L/ha — выше нормы",
+          fieldName, zoneLabel: stats.zone_label,
+          type: "fuel_warning", timestamp: now.toISOString(),
+        });
+      }
+    }
+
+    // 4. Stale prescriptions (older than 30 days)
+    const fieldPrescriptions = prescriptions.filter((p: any) => p.field_id === fieldId);
+    for (const presc of fieldPrescriptions) {
+      const created = new Date(presc.created_at);
+      const daysOld = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysOld > STALE_PRESCRIPTION_DAYS) {
+        alerts.push({
+          id: fieldId + "-stale-" + presc.id,
+          severity: "warning",
+          message: "Рецептура от " + created.toLocaleDateString("ru-RU") + " — устарела (" + daysOld + " дн.)",
+          fieldName, zoneLabel: presc.input_type || "VRA",
+          type: "stale_prescription", timestamp: now.toISOString(),
+        });
+      }
+    }
+
+    // 5. No telemetry data uploaded
+    if (fieldRecords.length === 0) {
+      alerts.push({
+        id: fieldId + "-no-telemetry",
+        severity: "warning",
+        message: "Нет данных телеметрии — загрузите CSV для анализа",
+        fieldName, zoneLabel: "—",
+        type: "no_telemetry", timestamp: now.toISOString(),
+      });
+    }
+
+    // 6. No prescriptions generated
+    if (fieldPrescriptions.length === 0) {
+      alerts.push({
+        id: fieldId + "-no-prescription",
+        severity: "warning",
+        message: "Нет рецептур — сгенерируйте VRA-план",
+        fieldName, zoneLabel: "—",
+        type: "no_prescription", timestamp: now.toISOString(),
+      });
+    }
+  }
+
+  return alerts.sort((a, b) => {
+    if (a.severity === "critical" && b.severity !== "critical") return -1;
+    if (a.severity !== "critical" && b.severity === "critical") return 1;
+    return 0;
+  });
+}
+
 export function getTelemetryStats(fieldId: string) {
   const field = getField(fieldId);
   if (!field) return [];
@@ -245,6 +431,10 @@ export function getAllTelemetryForField(fieldId: string) {
 // ============================================================
 // Prescriptions
 // ============================================================
+
+export function getPrescriptionsForField(fieldId: string) {
+  return getStore(getPrefixedKeys().prescriptions).filter((r: any) => r.field_id === fieldId);
+}
 
 export function generateLocalPrescription(fieldId: string, inputType: string) {
   const field = getField(fieldId);

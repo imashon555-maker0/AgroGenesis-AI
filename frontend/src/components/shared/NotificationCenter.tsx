@@ -1,39 +1,19 @@
-import { useState } from "react";
-import { useFields } from "@/hooks/useFields";
+import { useState, useRef, useEffect } from "react";
+import { computeAlerts } from "@/services/localStore";
 import { Bell, AlertTriangle, Leaf, X } from "lucide-react";
+import { sounds } from "@/services/sounds";
 
-interface Alert {
-  id: string;
-  severity: "warning" | "critical";
-  message: string;
-  fieldName: string;
-  zoneLabel: string;
-}
 
-const NDVI_WARN = 0.4;
-const NDVI_CRIT = 0.25;
-
-function genAlerts(fields: any[]): Alert[] {
-  const a: Alert[] = [];
-  for (const f of fields) {
-    for (const z of f.zones || []) {
-      const n = z.mean_ndvi || 0;
-      if (n < NDVI_CRIT) a.push({ id: f.id+"-"+z.id+"-c", severity: "critical", message: "NDVI "+n.toFixed(2)+" - критический стресс", fieldName: f.name, zoneLabel: z.zone_label });
-      else if (n < NDVI_WARN) a.push({ id: f.id+"-"+z.id+"-w", severity: "warning", message: "NDVI "+n.toFixed(2)+" - ниже нормы", fieldName: f.name, zoneLabel: z.zone_label });
-    }
-    const ns = (f.zones||[]).map((z:any)=>z.mean_ndvi||0.5);
-    const sp = Math.max(...ns)-Math.min(...ns);
-    if (sp>0.3 && f.zones.length>=2) a.push({ id:f.id+"-v", severity:"warning", message:"Разброс NDVI "+sp.toFixed(2)+" по зонам", fieldName:f.name, zoneLabel:"All" });
-  }
-  return a.sort((a,_b)=>a.severity==="critical"?-1:1);
-}
 
 export function NotificationCenter() {
-  const { data } = useFields();
-  const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  const fields = data?.fields || [];
-  const alerts = genAlerts(fields).filter(a => !dismissed.has(a.id));
+  const alerts = computeAlerts().filter(a => !dismissed.has(a.id));
+  const prevCount = useRef(alerts.length);
+  useEffect(() => {
+    if (alerts.length > prevCount.current) sounds.notification();
+    prevCount.current = alerts.length;
+  }, [alerts.length]);
 
   return (
     <div className="relative">
@@ -48,8 +28,9 @@ export function NotificationCenter() {
           {alerts.length === 0 ? <div className="p-6 text-center"><Leaf size={24} className="mx-auto text-agro-500 mb-2" /><p className="text-xs text-field-300">Все поля в норме</p></div> : alerts.map(alert => (
             <div key={alert.id} className="px-4 py-3 border-b border-canopy-800/60 last:border-0">
               <div className="flex items-start gap-2">
-                <AlertTriangle size={14} className={alert.severity === "critical" ? "text-red-400 mt-0.5 shrink-0" : "text-earth-300 mt-0.5 shrink-0"} />
-                <div className="flex-1 min-w-0"><p className="text-xs text-earth-50">{alert.fieldName}  - Зона {alert.zoneLabel}</p><p className="text-[11px] text-field-200 mt-0.5 truncate">{alert.message}</p></div>
+                <AlertTriangle size={14} className={alert.severity === "critical" ? "text-red-400 mt-0.5 shrink-0" : alert.type.includes("fuel") ? "text-orange-400 mt-0.5 shrink-0" : alert.type.includes("stale") ? "text-yellow-400 mt-0.5 shrink-0" : "text-earth-300 mt-0.5 shrink-0"} />
+                <div className="flex-1 min-w-0"><p className="text-xs text-earth-50">{alert.fieldName}  - Зона {alert.zoneLabel}</p><p className="text-[11px] text-field-200 mt-0.5 truncate">{alert.message}</p>
+                  <span className="text-[9px] text-field-400 mt-0.5 inline-block">{alert.type.replace(/_/g, " ")}</span></div>
                 <button onClick={() => setDismissed(p => new Set(p).add(alert.id))} className="p-0.5 text-field-400 hover:text-earth-100 shrink-0"><X size={12} /></button>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from "react";
 import { CheckCircle, XCircle, AlertTriangle, X, Info } from "lucide-react";
+import { sounds } from "@/services/sounds";
 
 type ToastType = "success" | "error" | "warning" | "info";
 
@@ -26,6 +27,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const addToast = useCallback((message: string, type: ToastType = "info", duration = 4000) => {
     const id = Math.random().toString(36).slice(2, 9);
     setToasts((prev) => [...prev, { id, message, type, duration }]);
+    if (type === "success") sounds.success();
+    else if (type === "error") sounds.error();
+    else if (type === "warning") sounds.notification();
   }, []);
 
   const removeToast = useCallback((id: string) => {

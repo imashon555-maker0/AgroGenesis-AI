@@ -14,6 +14,7 @@ import { SettingsPage } from "@/pages/SettingsPage";
 import { getCurrentUser, logout, type AuthUser } from "@/services/authStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { fieldsApi } from "@/api/fields";
+import { DemoWarning } from "@/components/shared/DemoWarning";
 
 export default function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -60,6 +61,7 @@ export default function App() {
       <DeviceProvider>
         <ToastProvider>
           <AppShell onLogout={handleLogout}>
+            <DemoWarning />
             <Routes>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/fields" element={<FieldsPage />} />

@@ -3,7 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useFields } from "@/hooks/useFields";
 import { fieldsApi } from "@/api/fields";
 import { getCurrentUser, updateProfile } from "@/services/authStore";
-import { Trash2, Download, Info, Wheat, Database, LogOut, User } from "lucide-react";
+import { Trash2, Download, Info, Wheat, Database, LogOut, User, Volume2, VolumeX } from "lucide-react";
+import { sounds } from "@/services/sounds";
 
 interface Props { onLogout?: () => void; }
 
@@ -17,6 +18,7 @@ export function SettingsPage({ onLogout }: Props) {
   const [editName, setEditName] = useState(user?.profile.name || "");
   const [editOrg, setEditOrg] = useState(user?.profile.organization || "");
   const [saved, setSaved] = useState(false);
+  const [muted, setMuted] = useState(sounds.isMuted());
   const fields = data?.fields || [];
 
   const handleClearAll = async () => {
@@ -41,6 +43,13 @@ export function SettingsPage({ onLogout }: Props) {
       document.body.appendChild(a); a.click();
       document.body.removeChild(a); URL.revokeObjectURL(url);
     } finally { setExporting(false); }
+  };
+
+  const handleToggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    sounds.setMuted(next);
+    if (!next) sounds.click();
   };
 
   const handleSaveProfile = () => {
@@ -133,6 +142,20 @@ export function SettingsPage({ onLogout }: Props) {
             <Trash2 size={16} />Очистить все данные
           </button>
         )}
+      </div>
+
+      <div className="bg-canopy-900/40 border border-canopy-700/40 rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          {muted ? <VolumeX size={16} className="text-earth-300" /> : <Volume2 size={16} className="text-earth-300" />}
+          <h2 className="text-sm font-semibold text-earth-100">Звуки</h2>
+        </div>
+        <button onClick={handleToggleMute} className="w-full flex items-center justify-between px-4 py-3 bg-canopy-800/40 rounded-lg hover:bg-canopy-700/40 transition-colors">
+          <span className="text-sm text-earth-200">Звуковые уведомления</span>
+          <div className={"w-10 h-6 rounded-full transition-colors duration-200 " + (muted ? "bg-canopy-600" : "bg-agro-600")}>
+            <div className={"w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 mt-0.5 " + (muted ? "translate-x-0.5" : "translate-x-[18px]")} />
+          </div>
+        </button>
+        <p className="text-[10px] text-field-400 mt-2">Звуки при успешных действиях, ошибках и оповещениях.</p>
       </div>
 
       <div className="bg-canopy-900/40 border border-canopy-700/40 rounded-xl p-5">

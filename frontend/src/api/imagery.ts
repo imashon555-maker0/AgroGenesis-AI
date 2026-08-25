@@ -1,5 +1,6 @@
 import { apiClient } from "./client";
 import * as local from "@/services/localStore";
+import { diagnoseImageWithAI } from "@/services/deepseek";
 
 // Generate synthetic NDVI/NDRE results for offline mode
 function generateSyntheticAnalysis(fieldId: string) {
@@ -50,7 +51,10 @@ export const imageryApi = {
       });
       return data;
     } catch {
-      // Mock diagnosis for offline mode
+      // Try AI diagnosis, fall back to mock
+      try {
+        return await diagnoseImageWithAI(imageBase64, context || "");
+      } catch { /* AI failed, use mock */ }
       return {
         condition: "nitrogen_deficiency",
         confidence: 0.78,

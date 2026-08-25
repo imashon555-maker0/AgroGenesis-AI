@@ -59,6 +59,22 @@ The app uses a custom agricultural color system defined in `tailwind.config.js`:
 ### Dark mode select dropdowns need `colorScheme: "dark"`
 HTML `<select>` elements ignore Tailwind dark theme colors — they render with white background by default. Add `style={{ colorScheme: "dark" }}` to every `<select>` to make them respect the dark theme. This applies to AppShell, TelemetryPage, ImageryPage, and PrescriptionsPage.
 
+
+### Tailwind toggle switches need custom arbitrary translate
+`translate-x-4.5` is not a valid Tailwind class — the thumb never moves. Use `translate-x-[18px]` for arbitrary values. Also, `transition-transform` without `duration-200` defaults to 0ms (no visible animation). Always pair custom translate with explicit duration.
+
+### FAB uses id-to-handlerMap dispatch
+FAB ACTIONS array uses  without string-keyed prop references. A  maps action IDs to prop callbacks. This avoids the fragile pattern where a string must exactly match a prop name.
+
+### prescriptionsApi.generate now has 3-tier fallback
+Try backend → catch, try DeepSeek API directly → catch, fall back to localStore.generateLocalPrescription(). DeepSeek calls require VITE_DEEPSEEK_API_KEY in .env.local; without it (or on 401), the local generator always works.
+
+### FieldCreationModal English placeholders survive translation passes
+ attributes use English "e.g." which is easy to miss. After any translation pass, grep for  to catch remaining English hint text.
+
+### CRLF line endings break node String.replace()
+On Windows, files have  line endings. A replacement targeting  won't match . Always account for  in replacement patterns, or read the file and inspect the actual bytes around the target string.
+
 ### Map-centric layout
 The DashboardPage puts the map as the primary view (full viewport height minus 56px header + 100px field strip). Field cards are in a horizontal scroll strip at the bottom. Clicking a field opens a slide-in detail panel from the right. The FAB (Floating Action Button) replaces the old UploadHub for primary actions.
 
@@ -79,6 +95,10 @@ Recharts tooltips use `background: "#1a3326"` (canopy-900) and `border: "1px sol
 ### Writing files through bash on Windows is fragile
 Heredocs break on backtick characters in JSX/TSX. Inline node scripts break on shell escaping of quotes. The reliable pattern: use node with String.fromCharCode(34) for double quotes and string concatenation (no template literals), save as base64, then decode separately. For surgical edits to existing files, use String.replace() in node to inject new code sections.
 
+
+### Regex backslashes die even in quoted heredocs
+Quoted heredocs (`<< 'EOF'`) preserve most content literally but bash still strips `\` in some Windows environments. The only reliable way to write regex like `{[\s\S]*}` is via `String.fromCharCode(92)` in a node script, not template literals or heredocs.
+
 ### Map fallback for missing Mapbox token
 FieldMap.tsx now renders a clean placeholder (icon + Set VITE_MAPBOX_TOKEN) when import.meta.env.VITE_MAPBOX_TOKEN is empty, instead of letting Mapbox GL error out. The overlay controls and legend still render on top.
 
@@ -91,11 +111,19 @@ WeatherWidget lives in the dashboard slide-in detail panel, between the zone lis
 ### localStore API shape is snake_case — UI uses camelCase
 `listFields()` returns `{ fields: Field[], total: number }`, not a plain array. `getTelemetryStats()` returns objects with `record_count`, `zone_label`, `area_ha` (snake_case). `generateLocalPrescription()` returns `{ zones: [...] }` with `application_rate`, not `zoneRates`/`rate`. The API layer (`fields.ts`, `telemetry.ts`) must bridge this naming mismatch.
 
+
+### preview_click may not trigger React handlers
+Accessibility-tree clicks via `preview_click(uid)` sometimes fail silently in React apps. If a click appears to do nothing, try `preview_evaluate` with `document.querySelector("button").click()` instead. This bypasses the accessibility bridge and fires the real DOM event.
+
 ### Vitest tests for localStore need fetch mock
 `loadSampleData()` is async and calls `fetch('/sample-telemetry.csv')`. In vitest/jsdom without a running dev server, `fetch` hangs forever. Use `vi.stubGlobal('fetch', async () => ({ ok: true, text: async () => csvContent }))` in `beforeEach` to provide mock CSV data.
 
-### UploadHub.tsx is dead code
-UploadHub is defined in src/components/upload/UploadHub.tsx but never imported anywhere. Superseded by FAB + individual page upload zones. Safe to ignore or delete.
+### UploadHub.tsx was deleted
+UploadHub was dead code (never imported). Deleted in simplify pass. FAB + per-page upload zones replaced it.
+
+
+### TS1490 "File appears to be binary" means file is corrupted
+Multiple failed write operations can corrupt a file with UTF-8 replacement characters (ï¿½). TypeScript then reports `TS1490: File appears to be binary`. Fix: fully rewrite the file from scratch via a node script, do not try incremental string replacements on the corrupted file.
 
 ### GitHub secret scanner blocks pushes with realistic placeholders
 `.env.example` containing realistic-looking API key formats (e.g., `sk-abc123...`) triggers GitHub's push protection secret scanner. Replace with obvious placeholders like `your-deepseek-api-key-here`. This also requires squashing the git history to remove the old secret-containing commits.

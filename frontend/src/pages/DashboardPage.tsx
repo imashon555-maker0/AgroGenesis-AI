@@ -11,6 +11,7 @@ import { WeatherWidget } from "@/components/shared/WeatherWidget";
 import { FieldCreationModal } from "@/components/upload/FieldCreationModal";
 import { fieldsApi } from "@/api/fields";
 import { Database, Wheat, Leaf, DollarSign, Satellite, TrendingUp, X, Trash2, Download, FileJson } from "lucide-react";
+import { sounds } from "@/services/sounds";
 
 export function DashboardPage() {
   const { data, isLoading } = useFields();
@@ -23,6 +24,7 @@ export function DashboardPage() {
   const [loadingSample, setLoadingSample] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
+  const [drawMode, setDrawMode] = useState(false);
 
   const fields = data?.fields || [];
   const activeField = fields.find((f) => f.id === (detailField || selectedFieldId || fields[0]?.id));
@@ -41,7 +43,7 @@ export function DashboardPage() {
 
   const handleDeleteField = async (id: string) => {
     try {
-      await fieldsApi.delete(id);
+      await fieldsApi.delete(id); sounds.delete();
       queryClient.invalidateQueries({ queryKey: ["fields"] });
       queryClient.invalidateQueries({ queryKey: ["telemetry-stats"] });
       queryClient.invalidateQueries({ queryKey: ["telemetry-geojson"] });
@@ -119,6 +121,14 @@ export function DashboardPage() {
         <FieldMap
           selectedFieldId={activeField?.id}
           showZones={true}
+          drawMode={drawMode}
+          onToggleDraw={() => setDrawMode(!drawMode)}
+          onDrawComplete={(geometry) => {
+            setDrawMode(false);
+            setShowFieldModal(true);
+            // Store geometry for the modal to pick up
+            (window as any).__drawnGeometry = JSON.stringify(geometry);
+          }}
           onFieldClick={(id) => {
             selectField(id);
             setDetailField(id);

@@ -30,6 +30,37 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
+          // Backend API — NetworkFirst (try network, fall back to cache)
+          {
+            urlPattern: /\/\/api\/v1\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              expiration: { maxEntries: 50, maxAgeSeconds: 3600 },
+              networkTimeoutSeconds: 5,
+            },
+          },
+          // DeepSeek AI API — NetworkFirst with longer cache
+          {
+            urlPattern: /^https:\/\/api\.deepseek\.com\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "deepseek-cache",
+              expiration: { maxEntries: 20, maxAgeSeconds: 86400 },
+              networkTimeoutSeconds: 10,
+            },
+          },
+          // OpenWeatherMap API — NetworkFirst
+          {
+            urlPattern: /^https:\/\/api\.openweathermap\.org\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "weather-cache",
+              expiration: { maxEntries: 10, maxAgeSeconds: 3600 },
+              networkTimeoutSeconds: 5,
+            },
+          },
+          // Mapbox API — CacheFirst (static data)
           {
             urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
             handler: "CacheFirst",
@@ -38,12 +69,22 @@ export default defineConfig({
               expiration: { maxEntries: 50, maxAgeSeconds: 86400 },
             },
           },
+          // Mapbox tiles — CacheFirst (heavy, rarely change)
           {
-            urlPattern: /^https:\/\/.*\.tile\.mapbox\.com\/.*/i,
+            urlPattern: /^https:\/\.*\.tile\.mapbox\.com\/.*/i,
             handler: "CacheFirst",
             options: {
               cacheName: "mapbox-tiles",
               expiration: { maxEntries: 200, maxAgeSeconds: 604800 },
+            },
+          },
+          // Static assets — CacheFirst (CSV samples, icons)
+          {
+            urlPattern: /\/.(?:csv|json|png|svg|woff2)$/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "static-assets",
+              expiration: { maxEntries: 30, maxAgeSeconds: 2592000 },
             },
           },
         ],
