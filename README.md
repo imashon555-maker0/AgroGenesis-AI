@@ -82,35 +82,7 @@ AgroGenesis AI is an autonomous multi-modal precision agriculture decision-suppo
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Quickstart
 
-### Prerequisites
-
-- Docker & Docker Compose
-- Git
-
-### 1. Clone & Start
-
-```bash
-git clone https://github.com/your-org/agrogenesis-ai.git
-cd agrogenesis-ai
-cp .env.example .env
-docker compose up --build
-```
-
-### 2. Access
-
-- **Frontend Dashboard**: http://localhost:5173
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
-- **Database**: localhost:5432
-
-### 3. Load Sample Data
-
-```bash
-# Backend shell
-docker compose exec backend python -m app.seed_data
-```
 
 ## 📁 Project Structure
 
