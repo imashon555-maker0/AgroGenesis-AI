@@ -11,7 +11,7 @@ import { ImageryPage } from "@/pages/ImageryPage";
 import { PrescriptionsPage } from "@/pages/PrescriptionsPage";
 import { EcoFinPage } from "@/pages/EcoFinPage";
 import { SettingsPage } from "@/pages/SettingsPage";
-import { getCurrentUser, type AuthUser } from "@/services/authStore";
+import { getCurrentUser, logout, type AuthUser } from "@/services/authStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { fieldsApi } from "@/api/fields";
 
@@ -39,6 +39,7 @@ export default function App() {
   }, []);
 
   const handleLogout = useCallback(() => {
+    logout();
     setUser(null);
   }, []);
 

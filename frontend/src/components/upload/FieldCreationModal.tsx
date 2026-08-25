@@ -26,7 +26,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
       fieldsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fields"] });
-      addToast("Field created successfully!", "success");
+      addToast("Поле успешно создано!", "success");
       resetForm();
       onClose();
     },
@@ -67,7 +67,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
         }
         setError("");
       } catch {
-        setError("Invalid JSON file");
+        setError("Неверный JSON-файл");
       }
     };
     reader.readAsText(file);
@@ -79,7 +79,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
       return;
     }
     if (!geometryText.trim()) {
-      setError("Field boundary geometry is required");
+      setError("Укажите границу поля");
       return;
     }
 

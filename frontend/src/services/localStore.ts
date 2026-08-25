@@ -253,14 +253,14 @@ export function generateLocalPrescription(fieldId: string, inputType: string) {
   const zones = field.zones.map((z: any) => ({
     zone_label: z.zone_label,
     application_rate: rates[z.zone_label] || 100,
-    rationale: "Zone " + z.zone_label + " (" + z.productivity_class + "): optimized " + inputType + " rate",
+    rationale: "Зона " + z.zone_label + " (класс " + z.productivity_class + "): оптимальная норма " + inputType,
   }));
   const avg = zones.reduce((s: number, z: any) => s + z.application_rate, 0) / zones.length;
   return {
     id: uuid(), field_id: fieldId, input_type: inputType, status: "draft",
     created_at: new Date().toISOString(), zones,
     total_estimated_input: Math.round(avg * 10) / 10,
-    operator_notes: "VRA Prescription for " + inputType,
+    operator_notes: "Рецептура VRA: " + inputType,
     deepseek_model: "local-generator",
   };
 }

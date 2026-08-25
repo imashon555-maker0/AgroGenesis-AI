@@ -9,10 +9,10 @@ interface FABProps {
 }
 
 const ACTIONS = [
-  { id: "field", label: "Создать поле", icon: MapPin, color: "bg-agro-600", onClick: "onCreateField" as const },
-  { id: "telemetry", label: "Загрузить данные", icon: Activity, color: "bg-blue-600", onClick: "onUploadTelemetry" as const },
-  { id: "photo", label: "Фото с дрона", icon: Camera, color: "bg-purple-600", onClick: "onUploadPhoto" as const },
-  { id: "prescription", label: "Рецептура", icon: Bot, color: "bg-earth-400", onClick: "onGeneratePrescription" as const },
+  { id: "field", label: "Создать поле", icon: MapPin, color: "bg-agro-600" },
+  { id: "telemetry", label: "Загрузить данные", icon: Activity, color: "bg-blue-600" },
+  { id: "photo", label: "Фото с дрона", icon: Camera, color: "bg-purple-600" },
+  { id: "prescription", label: "Рецептура", icon: Bot, color: "bg-earth-400" },
 ];
 
 export function FAB({
@@ -23,11 +23,11 @@ export function FAB({
 }: FABProps) {
   const [open, setOpen] = useState(false);
 
-  const handlers: Record<string, () => void> = {
-    onCreateField,
-    onUploadTelemetry,
-    onUploadPhoto,
-    onGeneratePrescription,
+  const handlerMap: Record<string, () => void> = {
+    field: onCreateField,
+    telemetry: onUploadTelemetry,
+    photo: onUploadPhoto,
+    prescription: onGeneratePrescription,
   };
 
   return (
@@ -74,7 +74,7 @@ export function FAB({
               </span>
               <button
                 onClick={() => {
-                  handlers[action.onClick]?.();
+                  handlerMap[action.id]?.();
                   setOpen(false);
                 }}
                 className={`

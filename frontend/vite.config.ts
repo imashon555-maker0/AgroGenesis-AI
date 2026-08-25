@@ -31,7 +31,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
           {
-            urlPattern: new RegExp("^https://api\.mapbox\.com/.*", "i"),
+            urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
             handler: "CacheFirst",
             options: {
               cacheName: "mapbox-cache",
@@ -39,7 +39,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: new RegExp("^https://.*\.tile\.mapbox\.com/.*", "i"),
+            urlPattern: /^https:\/\/.*\.tile\.mapbox\.com\/.*/i,
             handler: "CacheFirst",
             options: {
               cacheName: "mapbox-tiles",

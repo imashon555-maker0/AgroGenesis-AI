@@ -23,9 +23,9 @@ function genAlerts(fields: any[]): Alert[] {
     }
     const ns = (f.zones||[]).map((z:any)=>z.mean_ndvi||0.5);
     const sp = Math.max(...ns)-Math.min(...ns);
-    if (sp>0.3 && f.zones.length>=2) a.push({ id:f.id+"-v", severity:"warning", message:"Разброс НДВИ "+sp.toFixed(2)+" по зонам", fieldName:f.name, zoneLabel:"All" });
+    if (sp>0.3 && f.zones.length>=2) a.push({ id:f.id+"-v", severity:"warning", message:"Разброс NDVI "+sp.toFixed(2)+" по зонам", fieldName:f.name, zoneLabel:"All" });
   }
-  return a.sort((x)=>x.severity==="critical"?-1:1);
+  return a.sort((a,_b)=>a.severity==="critical"?-1:1);
 }
 
 export function NotificationCenter() {

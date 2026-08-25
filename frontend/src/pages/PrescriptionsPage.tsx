@@ -109,7 +109,7 @@ export function PrescriptionsPage() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <h3 className="font-bold text-earth-100 text-sm">
-                  {prescription.input_type.charAt(0).toUpperCase() + prescription.input_type.slice(1)} Prescription
+                  {prescription.input_type.charAt(0).toUpperCase() + prescription.input_type.slice(1)} Рецептура
                 </h3>
                 <p className="text-field-300 text-xs mt-1">
                   Ср.: {prescription.total_estimated_input?.toFixed(1)} kg/ha · Статус: <span className="text-agro-400">{prescription.status}</span>

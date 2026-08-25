@@ -61,3 +61,6 @@ uploads/
 # Backend runtime
 *.db
 backend/*.db
+
+# Compound Engineering local settings
+.compound-engineering/*.local.yaml

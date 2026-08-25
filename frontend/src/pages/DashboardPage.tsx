@@ -153,7 +153,7 @@ export function DashboardPage() {
                 <div className="bg-canopy-900/60 rounded-lg p-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Satellite size={12} className="text-field-300" />
-                    <span className="text-[10px] text-field-300 uppercase">Ср. НДВИ</span>
+                    <span className="text-[10px] text-field-300 uppercase">Средний NDVI</span>
                   </div>
                   <span className="text-lg font-bold text-earth-100">
                     {activeField.zones.length > 0
