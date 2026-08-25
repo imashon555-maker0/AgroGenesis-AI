@@ -48,13 +48,13 @@ export function FieldCard({ field, isSelected, onClick }: FieldCardProps) {
         </div>
 
         {/* Crop + area */}
-        <p className="text-[11px] text-field-300 truncate">{field.crop_type || "No crop"}</p>
+        <p className="text-[11px] text-field-300 truncate">{field.crop_type || "Нет культуры"}</p>
 
         {/* Stats row */}
         <div className="flex items-center gap-2 mt-2 text-[10px] text-field-300">
           <span>{field.area_ha?.toFixed(0) || "—"} ha</span>
           <span className="text-canopy-600">·</span>
-          <span>{field.zones.length} zones</span>
+          <span>{field.zones.length} зон</span>
         </div>
 
         {/* NDVI bar */}

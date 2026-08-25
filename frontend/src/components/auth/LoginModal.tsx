@@ -27,14 +27,14 @@ export function LoginModal({ onAuth }: Props) {
       if (mode === "login") {
         user = login(email, password);
       } else {
-        if (!name.trim()) throw new Error("Please enter your name");
-        if (!organization.trim()) throw new Error("Please enter your organization");
-        if (password.length < 6) throw new Error("Password must be at least 6 characters");
+        if (!name.trim()) throw new Error("Введите ваше имя");
+        if (!organization.trim()) throw new Error("Введите организацию");
+        if (password.length < 6) throw new Error("Пароль минимум 6 символов");
         user = register(email, password, name.trim(), organization.trim());
       }
       onAuth(user);
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      setError(err.message || "Произошла ошибка");
     } finally {
       setLoading(false);
     }
@@ -52,12 +52,12 @@ export function LoginModal({ onAuth }: Props) {
             <Wheat size={28} className="text-white" />
           </div>
           <h1 className="text-xl font-bold text-gray-900">
-            {mode === "login" ? "Welcome back" : "Create your account"}
+            {mode === "login" ? "Добро пожаловать" : "Создайте аккаунт"}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             {mode === "login"
-              ? "Sign in to AgroGenesis AI"
-              : "Start optimizing your fields with AI"}
+              ? "Войдите в AgroGenesis AI"
+              : "Начните оптимизировать поля с ИИ"}
           </p>
         </div>
 
@@ -66,28 +66,28 @@ export function LoginModal({ onAuth }: Props) {
           {mode === "register" && (
             <>
               <div>
-                <label className={labelClass}>Full Name</label>
+                <label className={labelClass}>Полное имя</label>
                 <div className="relative">
                   <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="John Smith"
+                    placeholder="Иван Иванов"
                     className={inputClass + " pl-10"}
                     required
                   />
                 </div>
               </div>
               <div>
-                <label className={labelClass}>Organization</label>
+                <label className={labelClass}>Организация</label>
                 <div className="relative">
                   <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    placeholder="KazAgro Holdings"
+                    placeholder="КазАгро Холдинг"
                     className={inputClass + " pl-10"}
                     required
                   />
@@ -97,14 +97,14 @@ export function LoginModal({ onAuth }: Props) {
           )}
 
           <div>
-            <label className={labelClass}>Email</label>
+            <label className={labelClass}>Электронная почта</label>
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
+                placeholder="email@company.com"
                 className={inputClass + " pl-10"}
                 required
               />
@@ -112,14 +112,14 @@ export function LoginModal({ onAuth }: Props) {
           </div>
 
           <div>
-            <label className={labelClass}>Password</label>
+            <label className={labelClass}>Пароль</label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === "register" ? "At least 6 characters" : "Enter your password"}
+                placeholder={mode === "register" ? "Минимум 6 символов" : "Введите пароль"}
                 className={inputClass + " pl-10 pr-10"}
                 required
                 minLength={6}
@@ -146,15 +146,15 @@ export function LoginModal({ onAuth }: Props) {
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white rounded-lg py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
           >
             {loading ? (
-              <><Loader2 size={16} className="animate-spin" /> {mode === "login" ? "Signing in..." : "Creating account..."}</>
+              <><Loader2 size={16} className="animate-spin" /> {mode === "login" ? "Вход..." : "Создание аккаунта..."}</>
             ) : (
-              mode === "login" ? "Sign in" : "Create account"
+              mode === "login" ? "Войти" : "Создать аккаунт"
             )}
           </button>
 
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200" /></div>
-            <div className="relative flex justify-center text-xs"><span className="bg-white px-3 text-gray-400">or</span></div>
+            <div className="relative flex justify-center text-xs"><span className="bg-white px-3 text-gray-400">или</span></div>
           </div>
 
           <button
@@ -165,14 +165,14 @@ export function LoginModal({ onAuth }: Props) {
             }}
             className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg py-3 text-sm font-medium transition-colors"
           >
-            {mode === "login" ? "Create a new account" : "Already have an account? Sign in"}
+            {mode === "login" ? "Создать новый аккаунт" : "Уже есть аккаунт? Войти"}
           </button>
         </form>
 
         {/* Footer */}
         <div className="px-8 pb-6 text-center">
           <p className="text-[11px] text-gray-400">
-            AgroGenesis AI v0.1.0 · Precision Agriculture
+            AgroGenesis AI v0.1.0 · Точное земледелие
           </p>
         </div>
       </div>

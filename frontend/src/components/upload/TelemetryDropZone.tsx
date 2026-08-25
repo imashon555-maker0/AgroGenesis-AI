@@ -4,7 +4,7 @@ import { useUploadTelemetry } from "@/hooks/useTelemetry";
 import { useToast } from "@/components/shared/Toast";
 
 interface TelemetryDropZoneProps {
-  fieldId: string;
+  fieldId?: string;
   onSuccess?: () => void;
 }
 
@@ -17,7 +17,7 @@ interface UploadResult {
 
 export function TelemetryDropZone({ fieldId, onSuccess }: TelemetryDropZoneProps) {
   const { addToast } = useToast();
-  const uploadMutation = useUploadTelemetry(fieldId);
+  const uploadMutation = useUploadTelemetry(fieldId || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -49,7 +49,7 @@ export function TelemetryDropZone({ fieldId, onSuccess }: TelemetryDropZoneProps
   const validateAndSelect = (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (ext !== "csv" && ext !== "xml") {
-      addToast("Only .csv (J1939) and .xml (ISOBUS) files are supported", "warning");
+      addToast("Поддерживаются только .csv (J1939) и .xml (ISOBUS) файлы", "warning");
       return;
     }
     setSelectedFile(file);
@@ -58,17 +58,21 @@ export function TelemetryDropZone({ fieldId, onSuccess }: TelemetryDropZoneProps
 
   const handleUpload = async () => {
     if (!selectedFile) return;
+    if (!fieldId) {
+      addToast("Выберите поле перед загрузкой файла", "warning");
+      return;
+    }
 
     try {
       const res = await uploadMutation.mutateAsync(selectedFile);
       setResult(res);
       addToast(
-        `Imported ${res.records_imported} records (${res.source_format}). ${res.zones_assigned} assigned to zones.`,
+        `Импортировано ${res.records_imported} записей (${res.source_format}). ${res.zones_assigned} распределено по зонам.`,
         "success"
       );
       onSuccess?.();
     } catch (err: any) {
-      addToast(`Upload failed: ${err.message}`, "error");
+      addToast(`Ошибка загрузки: ${err.message}`, "error");
     }
   };
 
@@ -116,10 +120,10 @@ export function TelemetryDropZone({ fieldId, onSuccess }: TelemetryDropZoneProps
               }`}
             />
             <p className="text-field-200 font-medium">
-              {isDragging ? "Drop file here" : "Drag telemetry file here"}
+              {isDragging ? "Отпустите файл здесь" : "Перетащите файл телеметрии сюда"}
             </p>
             <p className="text-field-300 text-sm mt-1">
-              or click to browse — supports .csv (J1939) and .xml (ISOBUS)
+              или нажмите для выбора — поддерживает .csv (J1939) и .xml (ISOBUS)
             </p>
           </>
         )}
@@ -137,21 +141,25 @@ export function TelemetryDropZone({ fieldId, onSuccess }: TelemetryDropZoneProps
       {selectedFile && !result && (
         <button
           onClick={handleUpload}
-          disabled={uploadMutation.isPending}
+          disabled={!fieldId || uploadMutation.isPending}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-agro-600 hover:bg-agro-500 disabled:opacity-60 text-earth-100 rounded-xl text-sm font-medium transition-all duration-200 animate-fade-in"
         >
           {uploadMutation.isPending ? (
             <>
               <Loader2 size={16} className="animate-spin-slow" />
-              Processing {selectedFile.name}...
+              Обработка {selectedFile.name}...
             </>
           ) : (
             <>
               <Upload size={16} />
-              Upload & Process
+              Загрузить и обработать
             </>
           )}
         </button>
+      )}
+
+      {!fieldId && selectedFile && !result && (
+        <p className="text-center text-xs text-field-300">Выберите поле, чтобы загрузить файл.</p>
       )}
 
       {/* Progress bar */}
@@ -176,7 +184,7 @@ export function TelemetryDropZone({ fieldId, onSuccess }: TelemetryDropZoneProps
               <CheckCircle size={20} className="text-agro-400" />
             </div>
             <div>
-              <p className="font-medium text-earth-100">Upload Complete</p>
+              <p className="font-medium text-earth-100">Загрузка завершена</p>
               <p className="text-xs text-field-300">{result.source_format.toUpperCase()} format</p>
             </div>
           </div>
@@ -184,15 +192,15 @@ export function TelemetryDropZone({ fieldId, onSuccess }: TelemetryDropZoneProps
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center">
               <p className="text-xl font-bold text-earth-100">{result.records_parsed}</p>
-              <p className="text-xs text-field-300">Parsed</p>
+              <p className="text-xs text-field-300">Разобрано</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold text-agro-400">{result.records_imported}</p>
-              <p className="text-xs text-field-300">Imported</p>
+              <p className="text-xs text-field-300">Загружено</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold text-blue-400">{result.zones_assigned}</p>
-              <p className="text-xs text-field-300">Zoned</p>
+              <p className="text-xs text-field-300">Распределено</p>
             </div>
           </div>
 
@@ -200,7 +208,7 @@ export function TelemetryDropZone({ fieldId, onSuccess }: TelemetryDropZoneProps
             onClick={() => { setSelectedFile(null); setResult(null); }}
             className="w-full mt-3 py-2 text-sm text-field-300 hover:text-earth-100 transition-colors"
           >
-            Upload another file
+            Загрузить другой файл
           </button>
         </div>
       )}

@@ -3,16 +3,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Map, Activity, Satellite, MoreHorizontal } from "lucide-react";
 
 const TABS = [
-  { path: "/", label: "Home", icon: 0 },
-  { path: "/fields", label: "Fields", icon: 1 },
-  { path: "/telemetry", label: "Data", icon: 2 },
-  { path: "/imagery", label: "Imagery", icon: 3 },
+  { path: "/", label: "Главная", icon: 0 },
+  { path: "/fields", label: "Поля", icon: 1 },
+  { path: "/telemetry", label: "Данные", icon: 2 },
+  { path: "/imagery", label: "Съёмка", icon: 3 },
 ];
 
 const MORE_ITEMS = [
-  { path: "/prescriptions", label: "Prescriptions" },
+  { path: "/prescriptions", label: "Рецептуры" },
   { path: "/ecofin", label: "EcoFin" },
-  { path: "/settings", label: "Settings" },
+  { path: "/settings", label: "Настройки" },
 ];
 
 export function MobileNav() {
@@ -50,7 +50,7 @@ export function MobileNav() {
         <button onClick={() => setOpen(!open)}
           className={"flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors min-w-[56px] " + (isMoreActive || open ? "text-earth-100" : "text-field-400")}>
           <MoreHorizontal size={20} />
-          <span className="text-[9px] font-medium">More</span>
+          <span className="text-[9px] font-medium">Ещё</span>
         </button>
       </nav>
     </>

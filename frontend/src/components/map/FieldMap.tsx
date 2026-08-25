@@ -178,19 +178,19 @@ export function FieldMap({
 
       {/* Legend */}
       <div className="absolute bottom-4 left-4 bg-field-900/90 border border-canopy-700/60 rounded-lg p-3 text-xs z-10 backdrop-blur-sm">
-        <p className="text-field-300 mb-1 font-medium">Productivity</p>
+        <p className="text-field-300 mb-1 font-medium">Продуктивность</p>
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-agro-500" />
-            <span className="text-field-200">High</span>
+            <span className="text-field-200">Высокая</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-earth-300" />
-            <span className="text-field-200">Medium</span>
+            <span className="text-field-200">Средняя</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-red-500" />
-            <span className="text-field-200">Low</span>
+            <span className="text-field-200">Низкая</span>
           </div>
         </div>
       </div>

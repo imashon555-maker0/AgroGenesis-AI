@@ -32,23 +32,23 @@ const PIE_COLORS = ["#2d8a4e", "#3b82f6", "#d4a843", "#8b5cf6"];
 
 export function EcoFinSummary({ data }: EcoFinDataProps) {
   const pieData = [
-    { name: "Fertilizer Savings", value: data.financial.fertilizer_cost_saving_usd },
-    { name: "Fuel Savings", value: data.financial.fuel_cost_saving_usd },
-    { name: "Carbon Credits", value: data.financial.carbon_credit_revenue_usd },
+    { name: "Экономия на удобрениях", value: data.financial.fertilizer_cost_saving_usd },
+    { name: "Экономия топлива", value: data.financial.fuel_cost_saving_usd },
+    { name: "Углеродные кредиты", value: data.financial.carbon_credit_revenue_usd },
   ];
 
   const carbonPieData = [
-    { name: "N₂O Avoided", value: data.carbon.n2o_avoided_tco2e_ha },
-    { name: "Manufacturing", value: data.carbon.manufacturing_offset_tco2e_ha },
+    { name: "Избежано N₂O", value: data.carbon.n2o_avoided_tco2e_ha },
+    { name: "Производство", value: data.carbon.manufacturing_offset_tco2e_ha },
   ];
 
   const barData = [
     {
-      name: "Baseline",
+      name: "Базовая",
       rate: 180,
     },
     {
-      name: "Optimized",
+      name: "Оптимизированная",
       rate: 140,
     },
   ];
@@ -57,7 +57,7 @@ export function EcoFinSummary({ data }: EcoFinDataProps) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Financial breakdown pie */}
       <div>
-        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">Value Breakdown ($/ha)</h4>
+        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">Структура стоимости ($/га)</h4>
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie
@@ -87,7 +87,7 @@ export function EcoFinSummary({ data }: EcoFinDataProps) {
 
       {/* Carbon breakdown pie */}
       <div>
-        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">Carbon Sources (tCO₂e/ha)</h4>
+        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">Источники углерода (тCO₂э/га)</h4>
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie
@@ -116,7 +116,7 @@ export function EcoFinSummary({ data }: EcoFinDataProps) {
 
       {/* N rate comparison */}
       <div>
-        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">N Rate Comparison</h4>
+        <h4 className="text-xs font-medium text-field-300 mb-2 text-center uppercase tracking-wide">Сравнение норм азота</h4>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={barData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#2d4a35" />

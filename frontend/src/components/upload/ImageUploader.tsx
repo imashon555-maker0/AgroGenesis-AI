@@ -21,7 +21,7 @@ export function ImageUploader({ fieldId: _fieldId, onDiagnosis }: ImageUploaderP
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      addToast("Please upload an image file (JPEG or PNG)", "warning");
+      addToast("Загрузите изображение (JPEG или PNG)", "warning");
       return;
     }
     const reader = new FileReader();
@@ -44,7 +44,7 @@ export function ImageUploader({ fieldId: _fieldId, onDiagnosis }: ImageUploaderP
       onDiagnosis?.(result);
       addToast(`Diagnosis: ${result.condition.replace(/_/g, " ")} (${(result.confidence * 100).toFixed(0)}% confidence)`, "info");
     } catch (err: any) {
-      addToast(`Diagnosis failed: ${err.message}`, "error");
+      addToast(`Ошибка диагностики: ${err.message}`, "error");
     } finally {
       setIsAnalyzing(false);
     }
@@ -82,8 +82,8 @@ export function ImageUploader({ fieldId: _fieldId, onDiagnosis }: ImageUploaderP
             className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-canopy-700/60 rounded-xl cursor-pointer hover:border-earth-300/40 hover:bg-canopy-800/30 transition-all duration-200"
           >
             <Upload size={28} className="text-field-400" />
-            <span className="text-sm text-field-300">Upload Image</span>
-            <span className="text-xs text-field-400">JPEG, PNG up to 10MB</span>
+            <span className="text-sm text-field-300">Загрузить фото</span>
+            <span className="text-xs text-field-400">JPEG, PNG до 10MB</span>
           </div>
 
           {/* Camera capture (mobile) */}
@@ -92,8 +92,8 @@ export function ImageUploader({ fieldId: _fieldId, onDiagnosis }: ImageUploaderP
             className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-canopy-700/60 rounded-xl cursor-pointer hover:border-blue-500/40 hover:bg-canopy-800/30 transition-all duration-200"
           >
             <Camera size={28} className="text-field-400" />
-            <span className="text-sm text-field-300">Take Photo</span>
-            <span className="text-xs text-field-400">Use device camera</span>
+            <span className="text-sm text-field-300">Сфотографировать</span>
+            <span className="text-xs text-field-400">Использовать камеру</span>
           </div>
 
           <input
@@ -150,12 +150,12 @@ export function ImageUploader({ fieldId: _fieldId, onDiagnosis }: ImageUploaderP
             {isAnalyzing ? (
               <>
                 <Loader2 size={16} className="animate-spin-slow" />
-                Analyzing with DeepSeek V4 Vision...
+                Анализ через DeepSeek V4 Vision...
               </>
             ) : (
               <>
                 <Bug size={16} />
-                Analyze Crop Health
+                Анализ здоровья культур
               </>
             )}
           </button>
@@ -201,7 +201,7 @@ export function ImageUploader({ fieldId: _fieldId, onDiagnosis }: ImageUploaderP
 
           {diagnosis.affected_areas.length > 0 && (
             <div className="mb-3">
-              <p className="text-xs text-field-300 mb-1">Affected Areas</p>
+              <p className="text-xs text-field-300 mb-1">Поражённые области</p>
               <div className="flex flex-wrap gap-1">
                 {diagnosis.affected_areas.map((area, i) => (
                   <span key={i} className="px-2 py-0.5 bg-canopy-800/60 rounded text-xs text-field-200">
@@ -213,7 +213,7 @@ export function ImageUploader({ fieldId: _fieldId, onDiagnosis }: ImageUploaderP
           )}
 
           <div className="bg-canopy-900/40 rounded-lg p-3">
-            <p className="text-xs text-field-300 mb-1">Recommended Action</p>
+            <p className="text-xs text-field-300 mb-1">Рекомендуемое действие</p>
             <p className="text-sm text-earth-300">{diagnosis.recommended_action}</p>
           </div>
         </div>

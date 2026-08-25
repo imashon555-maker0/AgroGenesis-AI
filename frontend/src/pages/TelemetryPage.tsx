@@ -19,8 +19,8 @@ export function TelemetryPage() {
       {/* Header */}
       <div className={"flex items-center justify-between flex-wrap gap-3 " + (isPhone ? "flex-col items-start" : "")}>
         <div>
-          <h2 className="text-lg font-bold text-earth-100">Telemetry Monitor</h2>
-          <p className="text-field-300 text-xs mt-1">Machine data and zone-level aggregation</p>
+          <h2 className="text-lg font-bold text-earth-100">Монитор телеметрии</h2>
+          <p className="text-field-300 text-xs mt-1">Данные техники и агрегация по зонам</p>
         </div>
         {fields.length > 0 && (
           <div className="relative">
@@ -41,20 +41,16 @@ export function TelemetryPage() {
 
       {/* Upload Section */}
       <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4">
-        <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Upload Telemetry Data</h3>
-        {fieldId ? (
-          <TelemetryDropZone fieldId={fieldId} />
-        ) : (
-          <p className="text-field-300 text-xs">Select a field to enable file upload</p>
-        )}
+        <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Загрузка данных телеметрии</h3>
+        <TelemetryDropZone fieldId={fieldId} />
       </div>
 
       {/* Zone Stats */}
       {fieldId && (
         <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4">
-          <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Zone Statistics</h3>
+          <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Статистика по зонам</h3>
           {statsLoading ? (
-            <div className="text-field-300 text-xs">Loading stats...</div>
+            <div className="text-field-300 text-xs">Загрузка статистики...</div>
           ) : stats && stats.length > 0 ? (
             <div className={"grid gap-3 " + (isPhone ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-4")}>
               {stats.map((s) => (
@@ -69,23 +65,23 @@ export function TelemetryPage() {
                           : "bg-red-500"
                       }`}
                     />
-                    <span className="text-xs font-medium text-earth-100">Zone {s.zone_label}</span>
+                    <span className="text-xs font-medium text-earth-100">Зона {s.zone_label}</span>
                   </div>
                   <div className="space-y-1 text-[11px]">
                     <div className="flex justify-between">
-                      <span className="text-field-300">Records</span>
+                      <span className="text-field-300">Записи</span>
                       <span className="text-earth-100 font-mono">{s.record_count}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-field-300">Speed</span>
+                      <span className="text-field-300">Скорость</span>
                       <span className="text-earth-100 font-mono">{s.avg_speed_kmh?.toFixed(1) || "—"} km/h</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-field-300">Fuel</span>
+                      <span className="text-field-300">Топливо</span>
                       <span className="text-earth-100 font-mono">{s.avg_fuel_l_ha?.toFixed(1) || "—"} L/ha</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-field-300">Applied</span>
+                      <span className="text-field-300">Внесение</span>
                       <span className="text-earth-100 font-mono">{s.avg_applied_rate_kg_ha?.toFixed(1) || "—"} kg/ha</span>
                     </div>
                     <div className="flex justify-between">
@@ -97,7 +93,7 @@ export function TelemetryPage() {
               ))}
             </div>
           ) : (
-            <p className="text-field-300 text-xs">No telemetry data yet. Upload a CSV file above.</p>
+            <p className="text-field-300 text-xs">Нет данных телеметрии. Загрузите CSV-файл выше.</p>
           )}
         </div>
       )}
@@ -105,7 +101,7 @@ export function TelemetryPage() {
       {/* Charts */}
       {stats && stats.length > 0 && (
         <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4">
-          <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Zone Comparison</h3>
+          <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Сравнение зон</h3>
           <ZoneComparison stats={stats} />
         </div>
       )}

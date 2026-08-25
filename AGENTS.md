@@ -8,6 +8,9 @@ All API modules (`fields.ts`, `telemetry.ts`, `imagery.ts`) use try/catch: try t
 ### `localStore.ts` is the offline backbone
 `frontend/src/services/localStore.ts` provides the full data layer when the backend is down: field creation with auto-generated 4-zone splits (A-D), CSV telemetry parsing with J1939 PGN decoding, zone-level aggregation, local prescription generation, and a `loadSampleData()` bootstrap. All frontend state flows through this file when offline.
 
+### Per-user localStorage isolation requires careful key handling
+getPrefixedKeys() returns ALREADY-prefixed keys (e.g., agro_user_com_agro_fields). getStore(key) and setStore(key, data) must NOT add the prefix again — callers pass pre-prefixed keys. A prior bug double-prefixed keys, causing fallback to legacy unprefixed keys and cross-user data leaks.
+
 ### Zone assignment is quadrant-based, not point-in-polygon
 `parseCSVTelemetry` in `localStore.ts` assigns GPS records to zones using a simple quadrant split (lat/lon above/below field midpoint). It does NOT do proper point-in-polygon testing. This means edge cases near zone boundaries may get misassigned. The backend (PostGIS) does real spatial queries — the client-side version is an approximation.
 
@@ -36,6 +39,15 @@ The client-side fallback in `telemetryApi.upload()` only handles CSV. XML (ISOBU
 ### Upload UI must always be visible
 Upload drop zones on Telemetry and Imagery pages are rendered unconditionally (not behind a "select a field first" guard). This was a deliberate UX decision — users need to see the upload interface immediately. Field selection is only required for the actual API call, not for UI visibility.
 
+### Mapbox <Source> crashes on field/user switch
+Mapbox GL Source components with different ids cannot be reused by React without remounting. Add key={selectedFieldId} to each Source in FieldMap.tsx. Without this, switching users or fields triggers "source id changed" error.
+
+### Sed replacements on JSX/TSX files break bracket matching
+Regex s/X/Y/g on JSX files can eat < before closing > tags (e.g., /td> becomes td>). Unicode escapes in node -e do not decode Cyrillic. Reliable pattern: read file in node, use String.replace() with exact literal strings, write back. Never use sed for JSX edits.
+
+### Dev server PID discovery on Windows
+wmic process where "CommandLine like '%vite.js%'" returns running vite PIDs. Multiple may exist from prior sessions. Try each with register_preview until one answers HTTP.
+
 ### Sample data coordinates must match field polygon
 The `loadSampleData()` function hardcodes GPS coordinates that fall within the KZ-Akmola-Wheat-01 polygon (lon 76.93-76.96, lat 43.25-43.27). If you change the field polygon boundaries, you must also update the CSV coordinates in the sample data, or records won't get zone-assigned.
 
@@ -60,6 +72,7 @@ Recharts tooltips use `background: "#1a3326"` (canopy-900) and `border: "1px sol
 
 - **The app must work without any backend setup.** The user explicitly stated this should not be a demo — it should be a working product. localStorage fallback is not optional.
 - **No Docker dependency for the end user.** Backend/Docker is for development only. The frontend must be self-contained.
+- **UI is fully Russian; data values stay English.** Field names, crop types, soil types, scientific units (km/h, L/ha, N2O, tCO2e, NDVI), and technical standards (ISOBUS, J1939) remain in English. Only UI chrome (headings, labels, buttons, hints) is translated.
 - **Design should match real farm management apps.** The user requested research-based design changes. The redesign followed patterns from John Deere Operations Center, Climate FieldView, and Trimble Ag.
 
 
@@ -80,6 +93,9 @@ WeatherWidget lives in the dashboard slide-in detail panel, between the zone lis
 
 ### Vitest tests for localStore need fetch mock
 `loadSampleData()` is async and calls `fetch('/sample-telemetry.csv')`. In vitest/jsdom without a running dev server, `fetch` hangs forever. Use `vi.stubGlobal('fetch', async () => ({ ok: true, text: async () => csvContent }))` in `beforeEach` to provide mock CSV data.
+
+### UploadHub.tsx is dead code
+UploadHub is defined in src/components/upload/UploadHub.tsx but never imported anywhere. Superseded by FAB + individual page upload zones. Safe to ignore or delete.
 
 ### GitHub secret scanner blocks pushes with realistic placeholders
 `.env.example` containing realistic-looking API key formats (e.g., `sk-abc123...`) triggers GitHub's push protection secret scanner. Replace with obvious placeholders like `your-deepseek-api-key-here`. This also requires squashing the git history to remove the old secret-containing commits.

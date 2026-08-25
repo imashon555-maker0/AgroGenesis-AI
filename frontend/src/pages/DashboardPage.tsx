@@ -87,16 +87,16 @@ export function DashboardPage() {
         <div className="w-20 h-20 rounded-2xl bg-canopy-800/60 flex items-center justify-center mb-6">
           <Wheat size={36} className="text-earth-300" />
         </div>
-        <h2 className="text-xl font-bold text-earth-100 mb-2">Welcome to AgroGenesis AI</h2>
+        <h2 className="text-xl font-bold text-earth-100 mb-2">Добро пожаловать в AgroGenesis AI</h2>
         <p className="text-field-300 text-center max-w-md mb-6 text-sm">
-          Start by creating your first field or loading sample data to explore the platform.
+          Начните с создания первого поля или загрузки тестовых данных.
         </p>
         <div className={isPhone ? "flex flex-col w-full max-w-xs" : "flex gap-3"}>
           <button
             onClick={() => setShowFieldModal(true)}
             className="px-5 py-2.5 bg-agro-600 hover:bg-agro-500 text-earth-100 rounded-lg text-sm font-medium transition-colors"
           >
-            Create Field
+            Создать поле
           </button>
           <button
             onClick={handleLoadSample}
@@ -104,7 +104,7 @@ export function DashboardPage() {
             className="flex items-center gap-2 px-5 py-2.5 bg-canopy-800/60 hover:bg-canopy-700/60 border border-canopy-600/40 text-earth-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
           >
             <Database size={16} />
-            {loadingSample ? "Loading..." : "Load Sample Data"}
+            {loadingSample ? "Загрузка..." : "Загрузить тестовые данные"}
           </button>
         </div>
         <FieldCreationModal isOpen={showFieldModal} onClose={() => setShowFieldModal(false)} />
@@ -143,7 +143,7 @@ export function DashboardPage() {
                 <h3 className="font-bold text-earth-100 text-sm">{activeField.name}</h3>
               </div>
               <p className="text-[11px] text-field-300 mt-1">
-                {activeField.crop_type || "No crop"} · {activeField.area_ha?.toFixed(0)} ha · {activeField.zones.length} zones
+                {activeField.crop_type || "Без культуры"} · {activeField.area_ha?.toFixed(0)} ha · {activeField.zones.length} зон
               </p>
             </div>
 
@@ -153,7 +153,7 @@ export function DashboardPage() {
                 <div className="bg-canopy-900/60 rounded-lg p-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Satellite size={12} className="text-field-300" />
-                    <span className="text-[10px] text-field-300 uppercase">Avg NDVI</span>
+                    <span className="text-[10px] text-field-300 uppercase">Ср. НДВИ</span>
                   </div>
                   <span className="text-lg font-bold text-earth-100">
                     {activeField.zones.length > 0
@@ -164,7 +164,7 @@ export function DashboardPage() {
                 <div className="bg-canopy-900/60 rounded-lg p-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <TrendingUp size={12} className="text-field-300" />
-                    <span className="text-[10px] text-field-300 uppercase">Zones</span>
+                    <span className="text-[10px] text-field-300 uppercase">Зоны</span>
                   </div>
                   <span className="text-lg font-bold text-earth-100">{activeField.zones.length}</span>
                 </div>
@@ -173,7 +173,7 @@ export function DashboardPage() {
 
             {/* Zone list */}
             <div className="p-4">
-              <h4 className="text-[10px] font-medium text-field-300 uppercase tracking-wide mb-3">Management Zones</h4>
+              <h4 className="text-[10px] font-medium text-field-300 uppercase tracking-wide mb-3">Зоны управления</h4>
               <div className="space-y-2">
                 {activeField.zones.map((z) => (
                   <div
@@ -191,7 +191,7 @@ export function DashboardPage() {
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-earth-100">Zone {z.zone_label}</span>
+                        <span className="text-xs font-medium text-earth-100">Зона {z.zone_label}</span>
                         <span className="text-[10px] text-field-300">{z.area_ha?.toFixed(0)} ha</span>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
@@ -228,14 +228,14 @@ export function DashboardPage() {
                 <div className="bg-canopy-900/40 rounded-lg p-3">
                   <div className="flex items-center gap-1 mb-1">
                     <DollarSign size={10} className="text-agro-400" />
-                    <span className="text-[10px] text-field-300">Savings</span>
+                    <span className="text-[10px] text-field-300">Экономия</span>
                   </div>
                   <span className="text-sm font-bold text-agro-400">${netBenefit.toFixed(2)}/ha</span>
                 </div>
                 <div className="bg-canopy-900/40 rounded-lg p-3">
                   <div className="flex items-center gap-1 mb-1">
                     <Leaf size={10} className="text-agro-400" />
-                    <span className="text-[10px] text-field-300">Carbon</span>
+                    <span className="text-[10px] text-field-300">Углерод</span>
                   </div>
                   <span className="text-sm font-bold text-agro-400">{carbonCredit} tCO₂e</span>
                 </div>
@@ -245,7 +245,7 @@ export function DashboardPage() {
 
             {/* Weather Widget */}
             <div className="p-4 border-b border-canopy-800/60">
-              <WeatherWidget />
+              <WeatherWidget fieldGeometry={activeField?.geometry} fieldName={activeField?.name} />
             </div>
 
             {/* Actions */}
@@ -256,20 +256,20 @@ export function DashboardPage() {
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-canopy-800/60 hover:bg-canopy-700/60 border border-canopy-700/40 rounded-lg text-xs text-earth-200 transition-colors disabled:opacity-50"
               >
                 <Download size={14} />
-                Export Telemetry CSV
+                Экспорт телеметрии CSV
               </button>
               {confirmDelete === activeField.id ? (
                 <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
-                  <p className="text-xs text-red-300 mb-2">This field and its data will be permanently deleted.</p>
+                  <p className="text-xs text-red-300 mb-2">Это поле и его данные будут удалены.</p>
                   <div className="flex gap-2">
-                    <button onClick={() => handleDeleteField(activeField.id)} className="flex-1 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-medium transition-colors">Delete</button>
-                    <button onClick={() => setConfirmDelete(null)} className="flex-1 px-3 py-1.5 bg-canopy-800/60 hover:bg-canopy-700/60 text-earth-200 rounded-lg text-xs transition-colors">Cancel</button>
+                    <button onClick={() => handleDeleteField(activeField.id)} className="flex-1 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-medium transition-colors">Удалить</button>
+                    <button onClick={() => setConfirmDelete(null)} className="flex-1 px-3 py-1.5 bg-canopy-800/60 hover:bg-canopy-700/60 text-earth-200 rounded-lg text-xs transition-colors">Отмена</button>
                   </div>
                 </div>
               ) : (
                 <button onClick={() => setConfirmDelete(activeField.id)} className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-900/20 hover:bg-red-900/40 border border-red-500/20 rounded-lg text-xs text-red-300 transition-colors">
                   <Trash2 size={14} />
-                  Delete Field
+                  Удалить поле
                 </button>
               )}
             </div>
@@ -296,10 +296,10 @@ export function DashboardPage() {
               onClick={handleExportGeoJSON}
               disabled={exporting === "geojson"}
               className="flex-shrink-0 flex flex-col items-center justify-center gap-1 w-[100px] h-full rounded-lg border border-dashed border-canopy-700/40 bg-canopy-900/30 hover:bg-canopy-800/40 text-field-300 hover:text-earth-200 transition-colors disabled:opacity-50"
-              title="Export all fields as GeoJSON"
+              title="Экспорт всех полей"
             >
               <FileJson size={16} />
-              <span className="text-[10px]">Export All</span>
+              <span className="text-[10px]">Экспорт</span>
             </button>
           )}
         </div>

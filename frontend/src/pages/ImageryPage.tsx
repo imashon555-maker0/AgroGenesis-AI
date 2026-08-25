@@ -35,8 +35,8 @@ export function ImageryPage() {
       {/* Header */}
       <div className={"flex items-center justify-between flex-wrap gap-3 " + (isPhone ? "flex-col items-start" : "")}>
         <div>
-          <h2 className="text-lg font-bold text-earth-100">Imagery & Diagnosis</h2>
-          <p className="text-field-300 text-xs mt-1">NDVI analysis and AI-powered crop diagnosis</p>
+          <h2 className="text-lg font-bold text-earth-100">Съёмка и диагностика</h2>
+          <p className="text-field-300 text-xs mt-1">Анализ НДВИ и ИИ-диагностика культур</p>
         </div>
         <div className="flex items-center gap-2">
           {fields.length > 0 && (
@@ -60,44 +60,44 @@ export function ImageryPage() {
             className="flex items-center gap-2 px-4 py-2 bg-agro-600 hover:bg-agro-500 disabled:opacity-50 text-earth-100 rounded-lg text-sm font-medium transition-colors"
           >
             <Satellite size={16} />
-            {analyzing ? "Analyzing..." : "Compute NDVI"}
+            {analyzing ? "Анализ..." : "Рассчитать НДВИ"}
           </button>
         </div>
       </div>
 
-      {/* Drone Image Diagnosis */}
+      {/* Диагностика по снимкам дронов */}
       <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4">
-        <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Drone Image Diagnosis</h3>
+        <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Диагностика по снимкам дронов</h3>
         <ImageUploader fieldId={fieldId || ""} />
       </div>
 
       {/* NDVI Results */}
       {ndviResult && (
         <div className="bg-canopy-900/60 border border-canopy-700/40 rounded-xl p-4 animate-pop-in">
-          <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Vegetation Analysis</h3>
+          <h3 className="text-xs font-semibold text-earth-100 uppercase tracking-wide mb-3">Анализ растительности</h3>
 
           {/* Summary */}
           <div className={"grid gap-3 mb-4 " + (isPhone ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-4")}>
             <div className="bg-canopy-900/40 rounded-lg p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Leaf size={10} className="text-field-300" />
-                <span className="text-[10px] text-field-300 uppercase">Mean NDVI</span>
+                <span className="text-[10px] text-field-300 uppercase">Ср. НДВИ</span>
               </div>
               <span className="text-lg font-bold text-earth-100">{ndviResult.vegetation_indices?.ndvi?.mean?.toFixed(3) || "—"}</span>
             </div>
             <div className="bg-canopy-900/40 rounded-lg p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Leaf size={10} className="text-field-300" />
-                <span className="text-[10px] text-field-300 uppercase">Mean NDRE</span>
+                <span className="text-[10px] text-field-300 uppercase">Ср. НДРЕ</span>
               </div>
               <span className="text-lg font-bold text-earth-100">{ndviResult.vegetation_indices?.ndre?.mean?.toFixed(3) || "—"}</span>
             </div>
             <div className="bg-canopy-900/40 rounded-lg p-3">
-              <span className="text-[10px] text-field-300 uppercase">Source</span>
+              <span className="text-[10px] text-field-300 uppercase">Источник</span>
               <p className="text-sm text-earth-100 mt-1">{ndviResult.source || "—"}</p>
             </div>
             <div className="bg-canopy-900/40 rounded-lg p-3">
-              <span className="text-[10px] text-field-300 uppercase">Zones</span>
+              <span className="text-[10px] text-field-300 uppercase">Зоны</span>
               <p className="text-sm text-earth-100 mt-1">{ndviResult.zone_stats?.length || 0}</p>
             </div>
           </div>
@@ -112,7 +112,7 @@ export function ImageryPage() {
                       (z.mean_ndvi || 0.5) >= 0.6 ? "bg-agro-500" : (z.mean_ndvi || 0.5) >= 0.4 ? "bg-earth-300" : "bg-red-500"
                     }`}
                   />
-                  <span className="text-xs font-medium text-earth-100 w-16">Zone {z.zone_label}</span>
+                  <span className="text-xs font-medium text-earth-100 w-16">Зона {z.zone_label}</span>
                   <div className="flex-1 h-1.5 bg-canopy-700 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${

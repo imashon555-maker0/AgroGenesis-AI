@@ -31,7 +31,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
       onClose();
     },
     onError: (err: any) => {
-      addToast(`Failed to create field: ${err.message}`, "error");
+      addToast(`Ошибка: ${err.message}`, "error");
       setError(err.message);
     },
   });
@@ -75,7 +75,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      setError("Field name is required");
+      setError("Введите название поля");
       return;
     }
     if (!geometryText.trim()) {
@@ -92,7 +92,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
         crop_type: cropType || undefined,
       });
     } catch {
-      setError("Invalid geometry JSON");
+      setError("Неверный JSON геометрии");
     }
   };
 
@@ -112,8 +112,8 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
               <MapPin size={20} className="text-earth-300" />
             </div>
             <div>
-              <h3 className="font-bold text-earth-100 text-lg">Create New Field</h3>
-              <p className="text-xs text-field-300">Define boundary and metadata</p>
+              <h3 className="font-bold text-earth-100 text-lg">Новое поле</h3>
+              <p className="text-xs text-field-300">Укажите местоположение и размер</p>
             </div>
           </div>
           <button
@@ -128,7 +128,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
         <div className="p-5 space-y-4">
           {/* Field Name */}
           <div>
-            <label className="block text-sm font-medium text-field-200 mb-1.5">Field Name *</label>
+            <label className="block text-sm font-medium text-field-200 mb-1.5">Название поля *</label>
             <input
               type="text"
               value={name}
@@ -141,7 +141,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
           {/* Soil + Crop row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-field-200 mb-1.5">Soil Type</label>
+              <label className="block text-sm font-medium text-field-200 mb-1.5">Тип почвы</label>
               <input
                 type="text"
                 value={soilType}
@@ -151,7 +151,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-field-200 mb-1.5">Crop Type</label>
+              <label className="block text-sm font-medium text-field-200 mb-1.5">Культура</label>
               <input
                 type="text"
                 value={cropType}
@@ -162,10 +162,22 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
             </div>
           </div>
 
+          {/* Quick region selection */}
+          <div>
+            <label className="block text-sm font-medium text-field-200 mb-1.5">Область Казахстана</label>
+            <div className="flex flex-wrap gap-1.5">
+              {[{n:"Акмолинская",lat:51.17,lon:71.43},{n:"Тургайская",lat:49.50,lon:68.22},{n:"Павлодарская",lat:52.28,lon:76.96},{n:"Карагандинская",lat:47.80,lon:67.25}].map((r) => (
+                <button key={r.n} type="button"
+                  onClick={() => { setGeometryText(JSON.stringify({type:"Polygon",coordinates:[[[r.lon-0.02,r.lat-0.01],[r.lon+0.02,r.lat-0.01],[r.lon+0.02,r.lat+0.01],[r.lon-0.02,r.lat+0.01],[r.lon-0.02,r.lat-0.01]]]})); setError(""); }}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-canopy-900/60 text-field-300 hover:bg-canopy-800/60 hover:text-earth-200 border border-canopy-700/40 transition-colors"
+                >{r.n}</button>
+              ))}
+            </div>
+          </div>
           {/* Geometry upload */}
           <div>
             <label className="block text-sm font-medium text-field-200 mb-1.5">
-              Field Boundary (GeoJSON) *
+              Координаты границы
             </label>
 
             {/* File upload button */}
@@ -178,7 +190,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
                 {fileName ? (
                   <span className="text-sm text-earth-300">{fileName}</span>
                 ) : (
-                  <span className="text-sm text-field-300">Upload GeoJSON file or paste below</span>
+                  <span className="text-sm text-field-300">Загрузите GeoJSON или вставьте координаты</span>
                 )}
               </div>
               <Upload size={16} className="text-field-400" />
@@ -195,7 +207,7 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
             <textarea
               value={geometryText}
               onChange={(e) => { setGeometryText(e.target.value); setError(""); }}
-              placeholder='{"type":"Polygon","coordinates":[[[69.18,43.22],[69.22,43.22],...]]}'
+              placeholder="JSON-координаты границы"
               rows={4}
               className="w-full mt-2 bg-canopy-900/60 border border-canopy-700/60 rounded-lg px-3 py-2.5 text-xs font-mono text-field-200 placeholder-canopy-600 focus:border-earth-300/60 focus:ring-1 focus:ring-earth-300/30 outline-none transition-colors resize-none"
             />
@@ -225,10 +237,10 @@ export function FieldCreationModal({ isOpen, onClose }: FieldCreationModalProps)
             {createMutation.isPending ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin-slow" />
-                Creating...
+                Создание...
               </>
             ) : (
-              "Create Field"
+              "Создать поле"
             )}
           </button>
         </div>

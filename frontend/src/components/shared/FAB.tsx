@@ -9,10 +9,10 @@ interface FABProps {
 }
 
 const ACTIONS = [
-  { id: "field", label: "Create Field", icon: MapPin, color: "bg-agro-600", onClick: "onCreateField" as const },
-  { id: "telemetry", label: "Upload Data", icon: Activity, color: "bg-blue-600", onClick: "onUploadTelemetry" as const },
-  { id: "photo", label: "Drone Photo", icon: Camera, color: "bg-purple-600", onClick: "onUploadPhoto" as const },
-  { id: "prescription", label: "Prescription", icon: Bot, color: "bg-earth-400", onClick: "onGeneratePrescription" as const },
+  { id: "field", label: "Создать поле", icon: MapPin, color: "bg-agro-600", onClick: "onCreateField" as const },
+  { id: "telemetry", label: "Загрузить данные", icon: Activity, color: "bg-blue-600", onClick: "onUploadTelemetry" as const },
+  { id: "photo", label: "Фото с дрона", icon: Camera, color: "bg-purple-600", onClick: "onUploadPhoto" as const },
+  { id: "prescription", label: "Рецептура", icon: Bot, color: "bg-earth-400", onClick: "onGeneratePrescription" as const },
 ];
 
 export function FAB({

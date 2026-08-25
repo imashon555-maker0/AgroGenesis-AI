@@ -36,7 +36,7 @@ function dataPrefix(email: string): string {
 
 export function register(email: string, password: string, name: string, organization: string): AuthUser {
   var users = getUsers();
-  if (users[email]) throw new Error("An account with this email already exists.");
+  if (users[email]) throw new Error("Уже существует аккаунт с этим почтовым.");
   var profile: UserProfile = { email, name, organization, role: "Farm Manager", createdAt: new Date().toISOString() };
   users[email] = { passwordHash: hashPassword(password), profile };
   setUsers(users);
@@ -48,8 +48,8 @@ export function register(email: string, password: string, name: string, organiza
 export function login(email: string, password: string): AuthUser {
   var users = getUsers();
   var entry = users[email];
-  if (!entry) throw new Error("No account found with this email.");
-  if (entry.passwordHash !== hashPassword(password)) throw new Error("Incorrect password.");
+  if (!entry) throw new Error("Аккаунт с таким почтовым не найден.");
+  if (entry.passwordHash !== hashPassword(password)) throw new Error("Неверный пароль.");
   var user: AuthUser = { profile: entry.profile, dataPrefix: dataPrefix(email) };
   localStorage.setItem(SESSION_KEY, JSON.stringify(user));
   return user;
